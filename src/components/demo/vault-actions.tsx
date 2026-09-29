@@ -2,7 +2,6 @@
 
 import { CheckIcon, CircleDashedIcon, LockIcon, LockOpenIcon, UndoDotIcon, UserCheckIcon } from "lucide-react"
 import { useState } from "react"
-import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { t } from "@/i18n/t"
@@ -48,6 +47,8 @@ function ClaimBlock({ vault, now, youReceive }: { vault: Vault; now: number; you
   const done = BigInt(vault.claimed) >= entitlement(vault)
   const waitingApprovals = vault.approval && !approvalMet(vault) ? vault.approval.required - vault.approval.approvals.length : 0
   const amountText = formatToken(claimable, vault.token, locale)
+  // Confirmations are shown inline, right where the action happened (no toast over the card).
+  const [result, setResult] = useState<string | null>(null)
 
   const run = () =>
     tx.run(
@@ -61,7 +62,7 @@ function ClaimBlock({ vault, now, youReceive }: { vault: Vault; now: number; you
       },
       (hash) => {
         const got = claimVault(vault.id, hash)
-        toast.success(t(a.claimed, { amount: formatToken(got, vault.token, locale) }))
+        setResult(t(a.claimed, { amount: formatToken(got, vault.token, locale) }))
       },
       { skipPrompt: !youReceive }
     )
@@ -104,7 +105,7 @@ function ClaimBlock({ vault, now, youReceive }: { vault: Vault; now: number; you
         </>
       )}
       {reason && !youReceive ? <p className="text-sm text-muted-foreground">{reason}</p> : null}
-      <TxFeedback state={tx.state} pendingLabel={a.claiming} revertedLabel={a.claimFailed} onRetry={() => void run()} onDismiss={tx.reset} />
+      <TxFeedback state={tx.state} pendingLabel={a.claiming} confirmedLabel={result ?? undefined} revertedLabel={a.claimFailed} onRetry={() => void run()} onDismiss={tx.reset} />
     </div>
   )
 }
@@ -118,6 +119,7 @@ function ApprovalBlock({ vault, youReview, me }: { vault: Vault; youReview: bool
   const n = policy.approvals.length
   const m = policy.reviewers.length
   const amountText = formatToken(vault.total, vault.token, locale)
+  const [result, setResult] = useState<string | null>(null)
 
   const approve = (reviewerAddress: string, simulated: boolean) =>
     tx.run(
@@ -132,7 +134,7 @@ function ApprovalBlock({ vault, youReview, me }: { vault: Vault; youReview: bool
       (hash) => {
         approveVault(vault.id, reviewerAddress, hash)
         const after = getDemo()?.vaults.find((v) => v.id === vault.id)?.approval?.approvals.length ?? n + 1
-        toast.success(after >= policy.required ? a.approvalsMet : t(a.approved, { n: after, m }))
+        setResult(after >= policy.required ? a.approvalsMet : t(a.approved, { n: after, m }))
       },
       { skipPrompt: simulated }
     )
@@ -176,7 +178,7 @@ function ApprovalBlock({ vault, youReview, me }: { vault: Vault; youReview: bool
           )
         })}
       </ul>
-      <TxFeedback state={tx.state} pendingLabel={a.approving} onDismiss={tx.reset} />
+      <TxFeedback state={tx.state} pendingLabel={a.approving} confirmedLabel={result ?? undefined} onDismiss={tx.reset} />
     </div>
   )
 }
@@ -218,9 +220,9 @@ function RevokeBlock({ vault, now }: { vault: Vault; now: number }) {
         movesValue: true,
       },
       (hash) => {
-        const got = revokeVault(vault.id, hash)
+        // Once revoked, this block is replaced by the "Revoked on…" note, which is the confirmation.
+        revokeVault(vault.id, hash)
         setConfirming(false)
-        toast.success(t(a.revoked, { amount: formatToken(got, vault.token, locale) }))
       }
     )
 

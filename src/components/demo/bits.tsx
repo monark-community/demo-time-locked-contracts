@@ -105,7 +105,22 @@ export function Countdown({ target, now, app, className }: { target: number; now
   )
 }
 
-export function Amount({ value, token, locale, className, frac }: { value: bigint | string; token: TokenSymbol; locale: Locale; className?: string; frac?: number }) {
+export function Amount({
+  value,
+  token,
+  locale,
+  className,
+  frac,
+  wrap,
+}: {
+  value: bigint | string
+  token: TokenSymbol
+  locale: Locale
+  className?: string
+  frac?: number
+  /** Allow the symbol to wrap under the number (narrow cards). */
+  wrap?: boolean
+}) {
   const digits = frac ?? (TOKENS[token].usd > 100 ? 4 : 2)
-  return <span className={cn("tabular whitespace-nowrap", className)}>{formatToken(value, token, locale, digits)}</span>
+  return <span className={cn("tabular", !wrap && "whitespace-nowrap", className)}>{formatToken(value, token, locale, digits)}</span>
 }

@@ -80,7 +80,7 @@ export function Dashboard() {
         </Button>
       </header>
 
-      <section aria-label={d.title} className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <section aria-label={d.title} className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))]">
         <SummaryCard label={d.summary.claimable} totals={claimable} emphasis />
         <SummaryCard label={d.summary.lockedOthers} totals={lockedOthers} />
         <div className="col-span-2 flex flex-col justify-between gap-2 rounded-2xl border bg-card p-4 lg:col-span-1">
@@ -102,7 +102,7 @@ export function Dashboard() {
       {demo.vaults.length === 0 ? (
         <p className="rounded-2xl border border-dashed p-8 text-center text-muted-foreground">{d.empty}</p>
       ) : (
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="flex min-w-0 flex-col gap-8">
             <VaultSection title={d.forYou} empty={d.forYouEmpty} vaults={forYou} now={now} incoming />
             <VaultSection title={d.funded} empty={d.fundedEmpty} vaults={funded} now={now} />
@@ -156,12 +156,19 @@ function SummaryCard({ label, totals, hint, emphasis, className }: { label: stri
   const { locale } = useAppCopy()
   const entries = TOKEN_LIST.filter((tk) => (totals[tk] ?? 0n) > 0n)
   return (
-    <div className={`flex flex-col justify-between gap-2 rounded-2xl border bg-card p-4 ${emphasis ? "border-primary/60" : ""} ${className ?? ""}`}>
+    <div className={`flex min-w-0 flex-col justify-between gap-2 rounded-2xl border bg-card p-4 ${emphasis ? "border-primary/60" : ""} ${className ?? ""}`}>
       <p className="text-xs font-bold text-muted-foreground">{label}</p>
       <div className="flex flex-col">
         {entries.length === 0 ? <span className="text-xl font-extrabold">0</span> : null}
         {entries.map((tk, i) => (
-          <Amount key={tk} value={totals[tk]!} token={tk} locale={locale} className={i === 0 ? "text-xl font-extrabold" : "text-sm font-bold text-muted-foreground"} />
+          <Amount
+            key={tk}
+            value={totals[tk]!}
+            token={tk}
+            locale={locale}
+            wrap
+            className={i === 0 ? "text-lg font-extrabold sm:text-xl" : "text-sm font-bold text-muted-foreground"}
+          />
         ))}
         {hint ? <span className="text-xs text-muted-foreground">{hint}</span> : null}
       </div>

@@ -3,7 +3,6 @@
 import { AlertCircleIcon, CalendarIcon, CoinsIcon, LockIcon, SparklesIcon, TrendingUpIcon, UserIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useId, useState, type ReactNode } from "react"
-import { toast } from "sonner"
 
 import { ScheduleChart } from "@/components/charts/schedule-chart"
 import { Button } from "@/components/ui/button"
@@ -19,7 +18,7 @@ import { useDemo, useNow } from "@/lib/demo/store"
 import { parseUnits, TOKEN_LIST, TOKENS } from "@/lib/demo/tokens"
 import type { Schedule, ScheduleKind, TokenSymbol } from "@/lib/demo/types"
 import { addMonths, tranches } from "@/lib/demo/vesting"
-import { formatDateLong, formatDateShort, formatMonthYear, formatToken } from "@/lib/format"
+import { formatDateLong, formatDateShort, formatToken } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 import { AppLoading } from "./app-frame"
@@ -180,7 +179,12 @@ function ComposerForm({ today }: { today: number }) {
   const submit = () => {
     setSubmitted(true)
     if (!valid || !schedule || !amount) {
-      toast.error(c.errors.summary)
+      // Errors are shown inline; move focus to the first one rather than raising a toast over the form.
+      window.setTimeout(() => {
+        const first = document.querySelector<HTMLElement>("form [aria-invalid='true']")
+        first?.focus()
+        first?.scrollIntoView({ block: "center", behavior: "smooth" })
+      }, 0)
       return
     }
     const reviewers = [
@@ -211,8 +215,8 @@ function ComposerForm({ today }: { today: number }) {
         movesValue: true,
       },
       (hash) => {
+        // The vault page confirms the creation inline (see VaultView), so no toast here.
         const id = lockVault(input, hash)
-        toast.success(t(c.created, { date: first ? formatDateLong(first.at, locale) : "" }))
         router.push(href(locale, `/app/vault/${id}`))
       }
     )
@@ -259,7 +263,7 @@ function ComposerForm({ today }: { today: number }) {
         </div>
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] lg:items-start">
         <form
           noValidate
           className="flex flex-col gap-6"
@@ -411,8 +415,8 @@ function ComposerForm({ today }: { today: number }) {
                   label={scheduleLine({ schedule, total: previewTotal, token: form.token }, app, locale)}
                   markers={schedule.cliff ? [{ at: new Date(schedule.cliff).getTime(), label: app.vault.chart.cliff, tone: "cliff" }] : []}
                   ticks={[
-                    { at: new Date(schedule.start).getTime(), label: formatMonthYear(schedule.start, locale) },
-                    { at: new Date(schedule.end).getTime(), label: formatMonthYear(schedule.end, locale) },
+                    { at: new Date(schedule.start).getTime(), label: formatDateShort(schedule.start, locale) },
+                    { at: new Date(schedule.end).getTime(), label: formatDateShort(schedule.end, locale) },
                   ]}
                 />
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">

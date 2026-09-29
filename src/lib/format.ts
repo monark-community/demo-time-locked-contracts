@@ -55,12 +55,15 @@ export function formatDateLong(iso: string | number, locale: Locale): string {
   return new Intl.DateTimeFormat(intlLocale[locale], { weekday: "short", day: "numeric", month: "short", year: "numeric" }).format(new Date(iso))
 }
 
+/** "Oct 2", or "May 29, 2027" when the date isn't in the current year. */
 export function formatDateShort(iso: string | number, locale: Locale): string {
-  return new Intl.DateTimeFormat(intlLocale[locale], { day: "numeric", month: "short" }).format(new Date(iso))
+  const d = new Date(iso)
+  const sameYear = d.getFullYear() === new Date().getFullYear()
+  return new Intl.DateTimeFormat(intlLocale[locale], { day: "numeric", month: "short", ...(sameYear ? {} : { year: "numeric" }) }).format(d)
 }
 
 export function formatMonthYear(iso: string | number, locale: Locale): string {
-  return new Intl.DateTimeFormat(intlLocale[locale], { month: "short", year: "2-digit" }).format(new Date(iso))
+  return new Intl.DateTimeFormat(intlLocale[locale], { month: "short", year: "numeric" }).format(new Date(iso))
 }
 
 /** "in 3 days", "dans 2 mois": the largest sensible unit. */

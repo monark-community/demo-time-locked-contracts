@@ -23,17 +23,16 @@ export function AppFrame({ children }: { children: ReactNode }) {
   return (
     <div className="flex flex-1 flex-col">
       <div className="border-b bg-secondary/40">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2.5 sm:px-6 lg:flex-row lg:items-center lg:gap-4">
-          <div className="flex min-w-0 flex-1 items-center justify-between gap-2 lg:justify-start">
-            {demo?.wallet.status === "connected" ? <DemoClock /> : null}
-            <div className="lg:hidden">
-              <DemoControls />
+        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2.5 sm:px-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6">
+          {demo?.wallet.status === "connected" ? (
+            <div className="flex min-w-0 items-center">
+              <DemoClock />
             </div>
-          </div>
+          ) : null}
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
             <NetworkBadge name={NETWORK_NAME} variant="outline" icon={<span className="block size-full rounded-full bg-success" />} />
-            <Disclaimer text={disclaimer} className="min-w-0" />
-            <div className="hidden lg:block">
+            <Disclaimer text={disclaimer} className="order-last basis-full sm:order-none sm:basis-auto" />
+            <div className="ml-auto">
               <DemoControls />
             </div>
           </div>

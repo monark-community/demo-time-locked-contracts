@@ -2,7 +2,6 @@
 
 import { FastForwardIcon } from "lucide-react"
 import { useState } from "react"
-import { toast } from "sonner"
 
 import { ScheduleChart, scheduleDomain, type ChartMarker } from "@/components/charts/schedule-chart"
 import { Button } from "@/components/ui/button"
@@ -10,7 +9,7 @@ import { t } from "@/i18n/t"
 import { advanceClock } from "@/lib/demo/store"
 import type { Vault } from "@/lib/demo/types"
 import { entitlement, unlockedAt } from "@/lib/demo/vesting"
-import { formatDateLong, formatMonthYear, formatToken } from "@/lib/format"
+import { formatDateLong, formatDateShort, formatMonthYear, formatToken } from "@/lib/format"
 
 import { useAppCopy } from "./app-provider"
 
@@ -38,16 +37,19 @@ export function ScheduleExplorer({ vault, now }: { vault: Vault; now: number }) 
   const locked = entitlement(vault) - unlocked
   const stopAt = vault.revokedAt ? new Date(vault.revokedAt).getTime() : null
 
+  // Short schedules get day-level labels; long ones month + year.
+  const tickLabel = (at: number) => (end - start < 120 * DAY ? formatDateShort(at, locale) : formatMonthYear(at, locale))
+
   const markers: ChartMarker[] = []
   if (vault.schedule.cliff) markers.push({ at: new Date(vault.schedule.cliff).getTime(), label: c.cliff, tone: "cliff" })
   if (stopAt !== null) markers.push({ at: stopAt, label: c.revoked, tone: "revoked" })
   if (now >= x0 && now <= x1) markers.push({ at: now, label: c.today, tone: "today" })
-  if (previewing) markers.push({ at: p, label: formatMonthYear(p, locale), tone: "preview" })
+  if (previewing) markers.push({ at: p, label: tickLabel(p), tone: "preview" })
 
   const ticks = [
-    { at: start, label: formatMonthYear(start, locale) },
-    { at: start + (end - start) / 2, label: formatMonthYear(start + (end - start) / 2, locale) },
-    { at: end, label: formatMonthYear(end, locale) },
+    { at: start, label: tickLabel(start) },
+    { at: start + (end - start) / 2, label: tickLabel(start + (end - start) / 2) },
+    { at: end, label: tickLabel(end) },
   ]
 
   const readout = t(previewing ? c.readout : c.readoutToday, {
@@ -102,9 +104,9 @@ export function ScheduleExplorer({ vault, now }: { vault: Vault; now: number }) 
             disabled={!previewing}
             className="shrink-0"
             onClick={() => {
+              // The chart, figures and padlocks update in place; the readout (aria-live) announces the new day.
               advanceClock(p - now)
               setPreview(null)
-              toast(t(app.clock.moved, { date: formatDateLong(p, locale) }))
             }}
           >
             <FastForwardIcon aria-hidden="true" />

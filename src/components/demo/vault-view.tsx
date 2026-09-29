@@ -2,6 +2,7 @@
 
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, LockIcon, LockOpenIcon, XIcon } from "lucide-react"
 import Link from "next/link"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { NetworkBadge } from "@/components/ui/network-badge"
@@ -9,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Wallet, WalletAddress } from "@/components/ui/wallet"
 import { href } from "@/i18n/config"
 import { t } from "@/i18n/t"
+import { lastCreatedId } from "@/lib/demo/ops"
 import { useDemo, useNow } from "@/lib/demo/store"
 import { NETWORK_NAME } from "@/lib/demo/tokens"
 import type { Party, Vault } from "@/lib/demo/types"
@@ -28,6 +30,7 @@ export function VaultView({ id }: { id: string }) {
   const now = useNow()
   const { app, locale } = useAppCopy()
   const v = app.vault
+  const [bannerClosed, setBannerClosed] = useState(false)
   if (!demo || !now) return <AppLoading label={app.loading} />
 
   const vault = demo.vaults.find((x) => x.id === id)
@@ -50,9 +53,22 @@ export function VaultView({ id }: { id: string }) {
   const claimable = claimableAt(vault, now)
   const locked = entitlement(vault) - unlocked
   const next = nextUnlock(vault, now)
+  const firstUnlock = tranches(vault)[0]
+  const showCreated = !bannerClosed && lastCreatedId() === vault.id
 
   return (
     <div className="flex flex-col gap-6">
+      {showCreated ? (
+        <div role="status" className="tv-rise flex items-start gap-3 rounded-2xl border border-success/40 bg-success/10 p-4 text-sm">
+          <CheckIcon className="mt-0.5 size-4 shrink-0 text-success" aria-hidden="true" />
+          <p className="flex-1 font-semibold">
+            {t(app.composer.created, { date: firstUnlock ? formatDateLong(firstUnlock.at, locale) : "" })}
+          </p>
+          <button type="button" onClick={() => setBannerClosed(true)} aria-label={app.close} className="-m-1 rounded-full p-1 text-muted-foreground hover:text-foreground">
+            <XIcon className="size-4" aria-hidden="true" />
+          </button>
+        </div>
+      ) : null}
       <div>
         <Link href={href(locale, "/app")} className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground">
           <ArrowLeftIcon className="size-4" aria-hidden="true" />
@@ -114,7 +130,7 @@ export function VaultView({ id }: { id: string }) {
         </ul>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
         <div className="flex min-w-0 flex-col gap-6">
           <ScheduleExplorer vault={vault} now={now} />
 
@@ -136,7 +152,8 @@ export function VaultView({ id }: { id: string }) {
           </Tabs>
         </div>
 
-        <div className="lg:sticky lg:top-24">
+        {/* On phones the actions come first, right under the figures. */}
+        <div className="order-first lg:sticky lg:top-24 lg:order-none">
           <VaultActions vault={vault} now={now} me={me} />
         </div>
       </div>

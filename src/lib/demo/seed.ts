@@ -227,7 +227,7 @@ export function createSeed(copy: SeedCopy, locale: "en" | "fr", nowMs: number): 
       address: YOU_ADDRESS,
       name: copy.youName,
       lastError: null,
-      balances: { tUSDC: units(8450, "tUSDC"), tDAI: units(3200, "tDAI"), tETH: units(1.85, "tETH") },
+      balances: { tUSDC: units(18400, "tUSDC"), tDAI: units(3200, "tDAI"), tETH: units(1.85, "tETH") },
     },
     vaults: [honorarium, vesting, bounty, stipend, grant, pledge, workshops],
     settings: { slow: false, failNext: false, clockOffset: 0 },

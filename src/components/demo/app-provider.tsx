@@ -52,11 +52,10 @@ export function AppProvider({ value, children }: { value: AppCopy; children: Rea
       <WalletPrompt />
       <Toaster
         theme={resolvedTheme === "dark" ? "dark" : "light"}
-        // Desktop: bottom-right. The vault page keeps its figures, chart and
-        // actions in the upper part of the screen (actions stick to the top of
-        // the right rail), so the bottom-right corner is empty space there.
-        // Phones: just under the sticky header, away from the action buttons
-        // that sit mid-screen when a transaction is started.
+        // Transactions and clock moves confirm inline, where they happened, so
+        // no toast ever sits on the vault card or chart. The only toast left
+        // is "Demo reset", shown after the controls dialog closes: bottom-right
+        // on desktop, under the header on phones.
         position={wide ? "bottom-right" : "top-center"}
         offset={{ bottom: 24, right: 24 }}
         mobileOffset={{ top: 72, left: 16, right: 16 }}

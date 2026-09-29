@@ -1,7 +1,7 @@
 "use client"
 
 import { ClockIcon, FastForwardIcon } from "lucide-react"
-import { toast } from "sonner"
+import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,7 +17,7 @@ import { intlLocale } from "@/i18n/config"
 import { advanceClock, useDemo, useNow } from "@/lib/demo/store"
 import type { Vault } from "@/lib/demo/types"
 import { nextUnlock } from "@/lib/demo/vesting"
-import { formatDateLong } from "@/lib/format"
+import { formatDateLong, formatDateShort } from "@/lib/format"
 
 import { useAppCopy } from "./app-provider"
 
@@ -41,6 +41,8 @@ export function DemoClock() {
   const now = useNow()
   const { app, locale } = useAppCopy()
   const c = app.clock
+  // No toast: the clock itself changes in place (with a short rise), and screen readers get the live message.
+  const [announce, setAnnounce] = useState("")
   if (!demo || !now) return null
 
   const days = Math.floor(demo.settings.clockOffset / DAY)
@@ -49,19 +51,23 @@ export function DemoClock() {
 
   const forward = (ms: number) => {
     advanceClock(ms)
-    toast(t(c.moved, { date: formatDateLong(now + ms, locale) }))
+    setAnnounce(t(c.moved, { date: formatDateLong(now + ms, locale) }))
   }
 
   return (
-    <div className="flex min-w-0 items-center gap-2">
+    <div className="flex w-full min-w-0 items-center justify-between gap-2 sm:justify-start">
+      <span role="status" className="sr-only">
+        {announce}
+      </span>
       <p className="flex min-w-0 items-center gap-1.5 text-xs" title={c.hint}>
         <ClockIcon className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
         <span className="sr-only">{c.label}: </span>
-        <span className="hidden font-semibold text-muted-foreground sm:inline">{c.label}</span>
-        <span className="truncate font-bold tabular">
-          {formatDateLong(now, locale)} · {time}
+        <span className="hidden font-semibold whitespace-nowrap text-muted-foreground sm:inline">{c.label}</span>
+        <span key={days} className="tv-rise truncate font-bold tabular">
+          <span className="sm:hidden">{formatDateShort(now, locale)}</span>
+          <span className="hidden sm:inline">{formatDateLong(now, locale)}</span> · {time}
         </span>
-        <span className={days > 0 ? "rounded-full bg-primary/15 px-1.5 font-bold text-primary-ink" : "text-muted-foreground"}>
+        <span className={days > 0 ? "rounded-full bg-primary/15 px-1.5 font-bold whitespace-nowrap text-primary-ink" : "whitespace-nowrap text-muted-foreground"}>
           {days > 0 ? t(c.ahead, { n: days }) : c.realTime}
         </span>
       </p>

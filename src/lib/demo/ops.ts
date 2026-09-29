@@ -40,6 +40,10 @@ export interface NewVault {
   approval: ApprovalPolicy | null
 }
 
+let justCreated: string | null = null
+/** Id of the vault created in this page session, so its page can confirm it inline. */
+export const lastCreatedId = () => justCreated
+
 /** lock(): deploys the vault and deposits the funds from your wallet. Returns the new vault id. */
 export function lockVault(input: NewVault, hash: string): string {
   const demo = getDemo()
@@ -59,6 +63,7 @@ export function lockVault(input: NewVault, hash: string): string {
   }
   update((s) => ({ ...s, vaults: [vault, ...s.vaults] }))
   addBalance(input.token, -BigInt(input.total))
+  justCreated = id
   return id
 }
 
