@@ -63,15 +63,12 @@ export function Dashboard() {
             .map((tr) => ({ vault: v, at: new Date(tr.at).getTime(), amount: tr.amount }))
     )
     .sort((a, b) => a.at - b.at)
-    .slice(0, 6)
+    .slice(0, 4)
 
   return (
     <div className="flex flex-col gap-8">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{d.title}</h1>
-          <p className="mt-2 max-w-[60ch] text-muted-foreground">{d.intro}</p>
-        </div>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{d.title}</h1>
         <Button asChild size="lg" className="self-start sm:self-auto">
           <Link href={href(locale, "/app/new")}>
             <PlusIcon aria-hidden="true" />
@@ -96,7 +93,7 @@ export function Dashboard() {
             <p className="text-lg font-bold text-muted-foreground">{d.summary.nextNone}</p>
           )}
         </div>
-        <SummaryCard label={d.summary.released} totals={released} hint={d.summary.releasedHint} className="col-span-2 lg:col-span-1" />
+        <SummaryCard label={d.summary.released} totals={released} className="col-span-2 lg:col-span-1" />
       </section>
 
       {demo.vaults.length === 0 ? (
@@ -143,7 +140,7 @@ export function Dashboard() {
               <h2 id="activity-title" className="text-lg font-bold">
                 {d.activity}
               </h2>
-              <ActivityFeed vaults={demo.vaults} now={now} limit={6} className="mt-3" />
+              <ActivityFeed vaults={demo.vaults} now={now} limit={4} className="mt-3" />
             </section>
           </aside>
         </div>
@@ -152,7 +149,7 @@ export function Dashboard() {
   )
 }
 
-function SummaryCard({ label, totals, hint, emphasis, className }: { label: string; totals: Totals; hint?: string; emphasis?: boolean; className?: string }) {
+function SummaryCard({ label, totals, emphasis, className }: { label: string; totals: Totals; emphasis?: boolean; className?: string }) {
   const { locale } = useAppCopy()
   const entries = TOKEN_LIST.filter((tk) => (totals[tk] ?? 0n) > 0n)
   return (
@@ -170,7 +167,6 @@ function SummaryCard({ label, totals, hint, emphasis, className }: { label: stri
             className={i === 0 ? "text-lg font-extrabold sm:text-xl" : "text-sm font-bold text-muted-foreground"}
           />
         ))}
-        {hint ? <span className="text-xs text-muted-foreground">{hint}</span> : null}
       </div>
     </div>
   )

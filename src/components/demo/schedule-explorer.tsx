@@ -5,6 +5,7 @@ import { useState } from "react"
 
 import { ScheduleChart, scheduleDomain, type ChartMarker } from "@/components/charts/schedule-chart"
 import { Button } from "@/components/ui/button"
+import { InfoTip } from "@/components/ui/info-tip"
 import { t } from "@/i18n/t"
 import { advanceClock } from "@/lib/demo/store"
 import type { Vault } from "@/lib/demo/types"
@@ -60,12 +61,9 @@ export function ScheduleExplorer({ vault, now }: { vault: Vault; now: number }) 
 
   return (
     <section aria-labelledby="chart-title" className="rounded-3xl border bg-card p-4 sm:p-6">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="chart-title" className="text-lg font-bold">
-          {c.title}
-        </h2>
-        <p className="text-xs text-muted-foreground">{c.axis}</p>
-      </div>
+      <h2 id="chart-title" className="text-lg font-bold">
+        {c.title}
+      </h2>
 
       <ScheduleChart
         schedule={vault.schedule}
@@ -80,9 +78,14 @@ export function ScheduleExplorer({ vault, now }: { vault: Vault; now: number }) 
       />
 
       <div className="mt-4">
-        <label htmlFor="scrubber" className="text-sm font-bold">
-          {c.preview}
-        </label>
+        <div className="flex items-center gap-1">
+          <label htmlFor="scrubber" className="text-sm font-bold">
+            {c.preview}
+          </label>
+          <InfoTip label={c.preview} className="-my-2">
+            {c.hint}
+          </InfoTip>
+        </div>
         <input
           id="scrubber"
           type="range"
@@ -97,8 +100,7 @@ export function ScheduleExplorer({ vault, now }: { vault: Vault; now: number }) 
         <p aria-live="polite" className="min-h-12 text-sm">
           {readout}
         </p>
-        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-muted-foreground">{c.hint}</p>
+        <div className="mt-2 flex sm:justify-end">
           <Button
             variant={previewing ? "default" : "outline"}
             disabled={!previewing}

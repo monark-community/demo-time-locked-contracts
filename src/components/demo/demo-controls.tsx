@@ -9,10 +9,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { resetDemo, setSettings, useDemo } from "@/lib/demo/store"
+import { NETWORK_NAME } from "@/lib/demo/tokens"
 
 import { useAppCopy } from "./app-provider"
 
-/** Visible demo controls: network speed, forced failure, and "Reset demo". */
+/** The app bar's network pill; opens the demo controls: network speed, forced failure, and "Reset demo". */
 export function DemoControls() {
   const demo = useDemo()
   const { app, seed, locale } = useAppCopy()
@@ -30,9 +31,11 @@ export function DemoControls() {
       }}
     >
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="shrink-0" title={c.open}>
+          <span className="size-2 rounded-full bg-success" aria-hidden="true" />
+          <span className="sr-only sm:not-sr-only">{NETWORK_NAME}</span>
+          <span className="sr-only">, {c.open}</span>
           <SlidersHorizontalIcon aria-hidden="true" />
-          {c.open}
           {demo.settings.failNext || demo.settings.slow ? (
             <span className="size-2 rounded-full bg-warning" aria-hidden="true" />
           ) : null}

@@ -65,7 +65,9 @@ export function DemoClock() {
         <span className="hidden font-semibold whitespace-nowrap text-muted-foreground sm:inline">{c.label}</span>
         <span key={days} className="tv-rise truncate font-bold tabular">
           <span className="sm:hidden">{formatDateShort(now, locale)}</span>
-          <span className="hidden sm:inline">{formatDateLong(now, locale)}</span> · {time}
+          <span className="hidden sm:inline">
+            {formatDateLong(now, locale)} · {time}
+          </span>
         </span>
         <span className={days > 0 ? "rounded-full bg-primary/15 px-1.5 font-bold whitespace-nowrap text-primary-ink" : "whitespace-nowrap text-muted-foreground"}>
           {days > 0 ? t(c.ahead, { n: days }) : c.realTime}

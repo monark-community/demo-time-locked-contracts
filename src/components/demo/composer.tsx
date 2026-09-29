@@ -6,6 +6,7 @@ import { useId, useState, type ReactNode } from "react"
 
 import { ScheduleChart } from "@/components/charts/schedule-chart"
 import { Button } from "@/components/ui/button"
+import { InfoTip } from "@/components/ui/info-tip"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
@@ -24,7 +25,6 @@ import { cn } from "@/lib/utils"
 import { AppLoading } from "./app-frame"
 import { useAppCopy } from "./app-provider"
 import { Amount, scheduleLine } from "./bits"
-import { Disclaimer } from "./disclaimer"
 import { TxFeedback } from "./tx-feedback"
 
 type TemplateKey = "grant" | "stipend" | "bounty" | "pledge" | "blank"
@@ -228,10 +228,7 @@ function ComposerForm({ today }: { today: number }) {
 
   return (
     <div className="flex flex-col gap-8">
-      <header>
-        <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{c.title}</h1>
-        <p className="mt-2 max-w-[60ch] text-muted-foreground">{c.intro}</p>
-      </header>
+      <h1 className="text-3xl font-extrabold tracking-display sm:text-4xl">{c.title}</h1>
 
       <section aria-labelledby="tpl-title">
         <h2 id="tpl-title" className="text-sm font-bold">
@@ -286,7 +283,7 @@ function ComposerForm({ today }: { today: number }) {
               <Field id={fid("rname")} label={c.fields.recipientName} error={show("recipientName")}>
                 <Input id={fid("rname")} value={form.recipientName} placeholder={c.fields.recipientNamePh} onChange={(e) => set("recipientName", e.target.value)} aria-invalid={!!show("recipientName")} aria-describedby={show("recipientName") ? `${fid("rname")}-err` : undefined} />
               </Field>
-              <Field id={fid("raddr")} label={c.fields.recipientAddress} hint={c.fields.addressHint} error={show("recipientAddress")}>
+              <Field id={fid("raddr")} label={c.fields.recipientAddress} error={show("recipientAddress")}>
                 <Input
                   id={fid("raddr")}
                   value={form.recipientAddress}
@@ -296,7 +293,7 @@ function ComposerForm({ today }: { today: number }) {
                   className="font-mono text-sm"
                   onChange={(e) => set("recipientAddress", e.target.value)}
                   aria-invalid={!!show("recipientAddress")}
-                  aria-describedby={`${fid("raddr")}-hint${show("recipientAddress") ? ` ${fid("raddr")}-err` : ""}`}
+                  aria-describedby={show("recipientAddress") ? `${fid("raddr")}-err` : undefined}
                 />
               </Field>
             </div>
@@ -359,8 +356,8 @@ function ComposerForm({ today }: { today: number }) {
               ))}
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field id={fid("start")} label={c.fields.start} hint={c.fields.startHint} error={show("start")}>
-                <Input id={fid("start")} type="date" min={dateInput(now)} value={form.start} onChange={(e) => set("start", e.target.value)} aria-invalid={!!show("start")} aria-describedby={`${fid("start")}-hint`} />
+              <Field id={fid("start")} label={c.fields.start} error={show("start")}>
+                <Input id={fid("start")} type="date" min={dateInput(now)} value={form.start} onChange={(e) => set("start", e.target.value)} aria-invalid={!!show("start")} />
               </Field>
               {form.kind === "date" ? (
                 <Field id={fid("unlock")} label={c.fields.unlockDate} error={show("unlockDate")}>
@@ -368,8 +365,8 @@ function ComposerForm({ today }: { today: number }) {
                 </Field>
               ) : null}
               {form.kind === "monthly" ? (
-                <Field id={fid("steps")} label={c.fields.steps} hint={c.fields.stepsHint} error={show("steps")}>
-                  <Input id={fid("steps")} type="number" inputMode="numeric" min={2} max={36} value={form.steps} onChange={(e) => set("steps", e.target.value)} aria-invalid={!!show("steps")} aria-describedby={`${fid("steps")}-hint`} />
+                <Field id={fid("steps")} label={c.fields.steps} info={c.fields.stepsHint} error={show("steps")}>
+                  <Input id={fid("steps")} type="number" inputMode="numeric" min={2} max={36} value={form.steps} onChange={(e) => set("steps", e.target.value)} aria-invalid={!!show("steps")} />
                 </Field>
               ) : null}
               {form.kind === "linear" ? (
@@ -379,8 +376,8 @@ function ComposerForm({ today }: { today: number }) {
               ) : null}
             </div>
             {form.kind === "linear" ? (
-              <Field id={fid("cliff")} label={c.fields.cliff} hint={c.fields.cliffHint} error={show("cliff")}>
-                <Input id={fid("cliff")} type="number" inputMode="numeric" min={0} max={59} value={form.cliff} className="sm:max-w-40" onChange={(e) => set("cliff", e.target.value)} aria-invalid={!!show("cliff")} aria-describedby={`${fid("cliff")}-hint`} />
+              <Field id={fid("cliff")} label={c.fields.cliff} info={c.fields.cliffHint} error={show("cliff")}>
+                <Input id={fid("cliff")} type="number" inputMode="numeric" min={0} max={59} value={form.cliff} className="sm:max-w-40" onChange={(e) => set("cliff", e.target.value)} aria-invalid={!!show("cliff")} />
               </Field>
             ) : null}
           </Fieldset>
@@ -470,7 +467,7 @@ function SubmitArea({
   onRetry: () => void
   onSubmit?: () => void
 }) {
-  const { app, locale, disclaimer } = useAppCopy()
+  const { app, locale } = useAppCopy()
   const c = app.composer
   const label = amount && amount > 0n ? t(c.submit, { amount: formatToken(amount, token, locale) }) : c.submitIdle
   return (
@@ -479,7 +476,6 @@ function SubmitArea({
         <LockIcon aria-hidden="true" />
         {label}
       </Button>
-      <Disclaimer text={disclaimer} />
       <TxFeedback state={tx.state} pendingLabel={c.pending} revertedLabel={c.failed} onRetry={onRetry} onDismiss={tx.reset} />
     </>
   )
@@ -497,18 +493,20 @@ function Fieldset({ legend, icon, children }: { legend: string; icon?: ReactNode
   )
 }
 
-function Field({ id, label, hint, error, children }: { id: string; label: string; hint?: string; error?: string; children: ReactNode }) {
+function Field({ id, label, info, error, children }: { id: string; label: string; info?: string; error?: string; children: ReactNode }) {
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
-      <Label htmlFor={id} className="text-sm font-bold">
-        {label}
-      </Label>
+      <div className="flex min-h-5 items-center gap-1">
+        <Label htmlFor={id} className="text-sm font-bold">
+          {label}
+        </Label>
+        {info ? (
+          <InfoTip label={label} className="-my-2 size-8">
+            {info}
+          </InfoTip>
+        ) : null}
+      </div>
       {children}
-      {hint ? (
-        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-          {hint}
-        </p>
-      ) : null}
       {error ? (
         <p id={`${id}-err`} role="alert" className="flex items-start gap-1.5 text-xs font-semibold text-destructive">
           <AlertCircleIcon className="mt-px size-3.5 shrink-0" aria-hidden="true" />

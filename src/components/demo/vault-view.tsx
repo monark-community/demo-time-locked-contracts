@@ -39,7 +39,6 @@ export function VaultView({ id }: { id: string }) {
       <section className="mx-auto flex max-w-lg flex-1 flex-col items-center justify-center py-12 text-center">
         <LockIcon className="size-10 text-muted-foreground" aria-hidden="true" />
         <h1 className="mt-5 text-2xl font-extrabold">{v.notFound.title}</h1>
-        <p className="mt-2 text-muted-foreground">{v.notFound.body}</p>
         <Button asChild className="mt-6">
           <Link href={href(locale, "/app")}>{v.notFound.back}</Link>
         </Button>

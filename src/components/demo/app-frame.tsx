@@ -1,40 +1,37 @@
 "use client"
 
-import { CheckIcon, Loader2Icon, LockKeyholeIcon, WalletIcon, XCircleIcon } from "lucide-react"
+import { Loader2Icon, LockKeyholeIcon, WalletIcon, XCircleIcon } from "lucide-react"
 import type { ReactNode } from "react"
 
 import { Button } from "@/components/ui/button"
-import { NetworkBadge } from "@/components/ui/network-badge"
 import { useDemo, useStorageOk } from "@/lib/demo/store"
-import { NETWORK_NAME } from "@/lib/demo/tokens"
 import { connectWallet } from "@/lib/demo/wallet"
 
 import { useAppCopy } from "./app-provider"
 import { DemoClock } from "./demo-clock"
 import { DemoControls } from "./demo-controls"
-import { Disclaimer } from "./disclaimer"
 
-/** App chrome under the site header: network, disclaimer, demo controls; gates on wallet connection. */
+/**
+ * One compact app bar under the site header: the demo clock, and one pill that
+ * shows the network and opens the demo controls. The testnet notice lives only
+ * in the wallet prompt (brand guidelines §11). Gates on wallet connection.
+ */
 export function AppFrame({ children }: { children: ReactNode }) {
   const demo = useDemo()
   const storageOk = useStorageOk()
-  const { app, disclaimer } = useAppCopy()
+  const { app } = useAppCopy()
 
   return (
     <div className="flex flex-1 flex-col">
       <div className="border-b bg-secondary/40">
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-2.5 sm:px-6 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-6">
+        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2 sm:px-6">
           {demo?.wallet.status === "connected" ? (
-            <div className="flex min-w-0 items-center">
+            <div className="flex min-w-0 flex-1 items-center">
               <DemoClock />
             </div>
           ) : null}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
-            <NetworkBadge name={NETWORK_NAME} variant="outline" icon={<span className="block size-full rounded-full bg-success" />} />
-            <Disclaimer text={disclaimer} className="order-last basis-full sm:order-none sm:basis-auto" />
-            <div className="ml-auto">
-              <DemoControls />
-            </div>
+          <div className="ml-auto">
+            <DemoControls />
           </div>
         </div>
       </div>
@@ -82,14 +79,6 @@ function ConnectGate() {
         {g.title}
       </h1>
       <p className="mt-3 text-muted-foreground">{g.body}</p>
-      <ul className="mt-6 flex flex-col gap-2 text-left text-sm">
-        {g.features.map((f) => (
-          <li key={f} className="flex items-center gap-2">
-            <CheckIcon className="size-4 text-success" aria-hidden="true" />
-            {f}
-          </li>
-        ))}
-      </ul>
       <Button
         size="lg"
         className="mt-8 w-full sm:w-auto"

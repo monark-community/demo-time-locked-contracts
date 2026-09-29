@@ -1,4 +1,4 @@
-import { ArrowRightIcon, CalendarCheck2Icon, EyeIcon, PlusIcon, ScaleIcon } from "lucide-react"
+import { ArrowRightIcon, PlusIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
@@ -24,7 +24,6 @@ export async function generateMetadata({ params }: PageProps<"/[locale]">): Prom
   return pageMetadata(locale, "/", null, getDictionary(locale).meta.description)
 }
 
-const OUTCOME_ICONS = [EyeIcon, CalendarCheck2Icon, ScaleIcon]
 const PHOTOS = [contributorImg, clubImg, meetupImg]
 
 // Example schedules for the three cards: the same 12,000 tUSDC over a year, shown ~5 months in.
@@ -59,8 +58,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         />
         <div className="relative mx-auto grid max-w-6xl gap-12 px-4 pt-12 pb-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-14 lg:pt-20 lg:pb-24">
           <div>
-            <p className="eyebrow text-primary-ink">{h.eyebrow}</p>
-            <h1 id="hero-title" className="mt-4 text-[2.25rem] leading-[1.06] font-extrabold tracking-display sm:text-5xl lg:text-[3.75rem]">
+            <h1 id="hero-title" className="text-[2.25rem] leading-[1.06] font-extrabold tracking-display sm:text-5xl lg:text-[3.75rem]">
               {h.title}
             </h1>
             <p className="mt-5 max-w-[34rem] text-lg text-muted-foreground sm:text-xl">{h.sub}</p>
@@ -75,79 +73,46 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
                 <Link href={href(locale, "/how-it-works")}>{h.ctaSecondary}</Link>
               </Button>
             </div>
-            <p className="mt-6 text-xs text-muted-foreground">{dict.common.disclaimer}</p>
           </div>
           <HeroVault locale={locale} copy={h.hero} />
         </div>
       </section>
 
-      {/* Outcomes */}
-      <section aria-labelledby="outcomes-title" className="border-y bg-secondary/50">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_2fr] lg:gap-16 lg:py-20">
-          <div>
-            <h2 id="outcomes-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
-              {h.outcomes.title}
-            </h2>
-            <p className="mt-4 text-muted-foreground">{h.outcomes.intro}</p>
-          </div>
-          <ol className="flex flex-col divide-y">
-            {h.outcomes.items.map((item, i) => {
-              const Icon = OUTCOME_ICONS[i] ?? EyeIcon
-              return (
-                <li key={item.title} className="grid grid-cols-[auto_1fr] gap-x-5 py-6 first:pt-0 last:pb-0">
-                  <Icon className="mt-1 size-7 text-primary" strokeWidth={1.75} aria-hidden="true" />
-                  <div>
-                    <h3 className="text-xl font-bold">{item.title}</h3>
-                    <p className="mt-1.5 text-muted-foreground">{item.body}</p>
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
-        </div>
-      </section>
-
       {/* Schedules */}
-      <section aria-labelledby="schedules-title" className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-        <div className="max-w-2xl">
-          <p className="eyebrow text-primary-ink">{h.schedules.eyebrow}</p>
-          <h2 id="schedules-title" className="mt-3 text-3xl font-bold tracking-display sm:text-[2rem]">
+      <section aria-labelledby="schedules-title" className="border-y bg-secondary/50">
+        <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
+          <h2 id="schedules-title" className="max-w-2xl text-3xl font-bold tracking-display sm:text-[2rem]">
             {h.schedules.title}
           </h2>
-          <p className="mt-4 text-muted-foreground">{h.schedules.body}</p>
+          <ul className="mt-10 grid gap-4 md:grid-cols-3">
+            {h.schedules.items.map((item, i) => (
+              <li key={item.title} className="flex flex-col rounded-3xl border bg-card p-6">
+                <ScheduleChart
+                  schedule={EXAMPLES[i] ?? EXAMPLES[0]!}
+                  total="12000000000"
+                  cut={EXAMPLE_CUT}
+                  size="sm"
+                  label={`${item.title}: ${item.body}`}
+                  padlocks={i !== 1}
+                />
+                <h3 className="mt-5 text-xl font-bold">{item.title}</h3>
+                <p className="mt-2 flex-1 text-muted-foreground">{item.body}</p>
+              </li>
+            ))}
+          </ul>
+          <Link
+            href={href(locale, "/how-it-works")}
+            className="mt-8 inline-flex min-h-11 items-center gap-1.5 font-bold text-primary-ink underline underline-offset-4"
+          >
+            {h.schedules.learnMore}
+            <ArrowRightIcon className="size-4" aria-hidden="true" />
+          </Link>
         </div>
-        <ul className="mt-10 grid gap-4 md:grid-cols-3">
-          {h.schedules.items.map((item, i) => (
-            <li key={item.title} className="flex flex-col rounded-3xl border bg-card p-6">
-              <ScheduleChart
-                schedule={EXAMPLES[i] ?? EXAMPLES[0]!}
-                total="12000000000"
-                cut={EXAMPLE_CUT}
-                size="sm"
-                label={`${item.title}: ${item.body}`}
-                padlocks={i !== 1}
-              />
-              <h3 className="mt-5 text-xl font-bold">{item.title}</h3>
-              <p className="mt-2 flex-1 text-muted-foreground">{item.body}</p>
-              <p className="mt-4 text-xs font-semibold text-muted-foreground">{item.example}</p>
-            </li>
-          ))}
-        </ul>
-        <Link
-          href={href(locale, "/how-it-works")}
-          className="mt-8 inline-flex min-h-11 items-center gap-1.5 font-bold text-primary-ink underline underline-offset-4"
-        >
-          {h.schedules.learnMore}
-          <ArrowRightIcon className="size-4" aria-hidden="true" />
-        </Link>
       </section>
-
-      <SectionDivider />
 
       {/* Who */}
       <section aria-labelledby="who-title" className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-        <p className="eyebrow text-primary-ink">{h.who.eyebrow}</p>
-        <h2 id="who-title" className="mt-3 max-w-2xl text-3xl font-bold tracking-display sm:text-[2rem]">
+        <h2 id="who-title" className="max-w-2xl text-3xl font-bold tracking-display sm:text-[2rem]">
           {h.who.title}
         </h2>
         <ul className="mt-10 grid gap-6 md:grid-cols-2">
@@ -202,12 +167,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       {/* Closing */}
       <section aria-labelledby="closing-title" className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6">
         <div className="flex flex-col items-start gap-6 rounded-3xl border bg-card p-8 sm:p-10 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 id="closing-title" className="text-2xl font-bold tracking-display sm:text-3xl">
-              {h.closing.title}
-            </h2>
-            <p className="mt-2 max-w-[56ch] text-muted-foreground">{h.closing.body}</p>
-          </div>
+          <h2 id="closing-title" className="text-2xl font-bold tracking-display sm:text-3xl">
+            {h.closing.title}
+          </h2>
           <Button asChild size="lg" className="shrink-0">
             <Link href={href(locale, "/app")}>
               {h.closing.cta}

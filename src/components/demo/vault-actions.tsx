@@ -4,6 +4,7 @@ import { CheckIcon, CircleDashedIcon, LockIcon, LockOpenIcon, UndoDotIcon, UserC
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { InfoTip } from "@/components/ui/info-tip"
 import { t } from "@/i18n/t"
 import { useTx } from "@/lib/demo/chain"
 import { approveVault, claimVault, revokeVault } from "@/lib/demo/ops"
@@ -13,12 +14,11 @@ import { approvalMet, claimableAt, entitlement, isFunder, isRecipient, nextUnloc
 import { formatDateLong, formatToken } from "@/lib/format"
 
 import { useAppCopy } from "./app-provider"
-import { Disclaimer } from "./disclaimer"
 import { TxFeedback } from "./tx-feedback"
 
 /** Everything you can do with a vault, depending on who you are in it. */
 export function VaultActions({ vault, now, me }: { vault: Vault; now: number; me: string }) {
-  const { app, disclaimer } = useAppCopy()
+  const { app } = useAppCopy()
   const a = app.vault.actions
   const youReceive = isRecipient(vault, me)
   const youFund = isFunder(vault, me)
@@ -32,7 +32,6 @@ export function VaultActions({ vault, now, me }: { vault: Vault; now: number; me
       <ClaimBlock vault={vault} now={now} youReceive={youReceive} />
       {vault.approval ? <ApprovalBlock vault={vault} youReview={youReview} me={me} /> : null}
       {youFund ? <RevokeBlock vault={vault} now={now} /> : <p className="text-xs text-muted-foreground">{t(a.fundedByOther, { name: vault.funder.name })}</p>}
-      <Disclaimer text={disclaimer} />
     </section>
   )
 }
@@ -94,12 +93,12 @@ function ClaimBlock({ vault, now, youReceive }: { vault: Vault; now: number; you
         <>
           <p className="text-sm text-muted-foreground">{t(a.claimOnlyRecipient, { name: vault.recipient.name })}</p>
           {claimable > 0n ? (
-            <div className="flex flex-col gap-1.5">
-              <Button variant="outline" className="w-full" disabled={tx.busy} onClick={() => void run()}>
+            <div className="flex items-center gap-1">
+              <Button variant="outline" className="min-w-0 flex-1" disabled={tx.busy} onClick={() => void run()}>
                 <UserCheckIcon aria-hidden="true" />
                 {t(a.simulateClaim, { name: vault.recipient.name.split(" ")[0] ?? vault.recipient.name })}
               </Button>
-              <p className="text-xs text-muted-foreground">{a.simulateHint}</p>
+              <InfoTip label={a.simulateWhy}>{a.simulateHint}</InfoTip>
             </div>
           ) : null}
         </>
@@ -142,12 +141,16 @@ function ApprovalBlock({ vault, youReview, me }: { vault: Vault; youReview: bool
   return (
     <div className="flex flex-col gap-3 rounded-2xl border p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-bold">{a.approvalsTitle}</h3>
+        <h3 className="flex items-center gap-1 text-sm font-bold">
+          {a.approvalsTitle}
+          <InfoTip label={a.approvalsTitle} className="-my-2">
+            {t(a.approvalsNeeded, { required: policy.required, total: m })}
+          </InfoTip>
+        </h3>
         <span className={met ? "text-sm font-bold text-success" : "text-sm font-bold text-warning"}>
           {met ? a.approvalsMet : t(a.approvalsProgress, { n, m })}
         </span>
       </div>
-      <p className="text-xs text-muted-foreground">{t(a.approvalsNeeded, { required: policy.required, total: m })}</p>
       <ul className="flex flex-col gap-2">
         {policy.reviewers.map((r) => {
           const ok = policy.approvals.includes(r.address)
@@ -229,13 +232,10 @@ function RevokeBlock({ vault, now }: { vault: Vault; now: number }) {
   return (
     <div className="flex flex-col gap-3 border-t pt-4">
       {!confirming ? (
-        <div className="flex flex-col gap-2">
-          <Button variant="destructive" className="w-full" disabled={tx.busy} onClick={() => setConfirming(true)}>
-            <UndoDotIcon aria-hidden="true" />
-            {a.revoke}
-          </Button>
-          <p className="text-xs text-muted-foreground">{a.revokeHint}</p>
-        </div>
+        <Button variant="destructive" className="w-full" disabled={tx.busy} onClick={() => setConfirming(true)}>
+          <UndoDotIcon aria-hidden="true" />
+          {a.revoke}
+        </Button>
       ) : (
         <div role="alertdialog" aria-labelledby="revoke-q" aria-describedby="revoke-body" className="flex flex-col gap-3 rounded-2xl border border-destructive/40 p-4">
           <p id="revoke-q" className="font-bold">

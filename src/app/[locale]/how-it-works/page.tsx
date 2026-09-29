@@ -1,4 +1,4 @@
-import { ArrowRightIcon, HourglassIcon, LockIcon, LockOpenIcon, UndoDotIcon, UserCheckIcon, WalletIcon } from "lucide-react"
+import { ArrowRightIcon, HourglassIcon, LockIcon, LockOpenIcon, PlusIcon, UndoDotIcon, UserCheckIcon, WalletIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
@@ -63,8 +63,7 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
   return (
     <div className="flex flex-col">
       <header className="mx-auto w-full max-w-6xl px-4 pt-12 pb-10 sm:px-6 lg:pt-16">
-        <p className="eyebrow text-primary-ink">{w.eyebrow}</p>
-        <h1 className="mt-3 max-w-3xl text-4xl font-extrabold tracking-display sm:text-5xl">{w.title}</h1>
+        <h1 className="max-w-3xl text-4xl font-extrabold tracking-display sm:text-5xl">{w.title}</h1>
         <p className="mt-5 max-w-[68ch] text-lg text-muted-foreground">{w.intro}</p>
       </header>
 
@@ -73,7 +72,6 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
         <h2 id="life-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
           {w.life.title}
         </h2>
-        <p className="mt-3 max-w-[68ch] text-muted-foreground">{w.life.body}</p>
         <figure aria-label={w.life.diagramLabel} className="mt-8">
           <ol className="relative grid gap-6 md:grid-cols-4 md:gap-4">
             <span aria-hidden="true" className="absolute top-6 right-[12%] left-[12%] hidden h-0.5 bg-primary md:block" />
@@ -201,35 +199,38 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
             {w.dev.title}
           </h2>
           <p className="mt-3 max-w-[68ch] text-muted-foreground">{w.dev.body}</p>
-          <div className="mt-8 grid gap-8 lg:grid-cols-[1.25fr_1fr]">
-            <div className="min-w-0">
-              <h3 className="text-sm font-bold">{w.dev.interfaceTitle}</h3>
-              <pre className="mt-3 overflow-x-auto rounded-2xl border bg-card p-4 text-[0.8125rem] leading-relaxed">
-                <code className="font-mono">{INTERFACE}</code>
-              </pre>
+          <details className="group mt-6">
+            <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 font-bold text-primary-ink [&::-webkit-details-marker]:hidden">
+              <PlusIcon className="size-4 transition-transform duration-200 group-open:rotate-45" aria-hidden="true" />
+              {w.dev.show}
+            </summary>
+            <div className="mt-6 grid gap-8 lg:grid-cols-[1.25fr_1fr]">
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold">{w.dev.interfaceTitle}</h3>
+                <pre className="mt-3 overflow-x-auto rounded-2xl border bg-card p-4 text-[0.8125rem] leading-relaxed">
+                  <code className="font-mono">{INTERFACE}</code>
+                </pre>
+              </div>
+              <div>
+                <h3 className="text-sm font-bold">{w.dev.mapTitle}</h3>
+                <dl className="mt-3 flex flex-col divide-y rounded-2xl border bg-card">
+                  {w.dev.map.map((m) => (
+                    <div key={m.k} className="p-4">
+                      <dt className="font-mono text-xs font-semibold text-primary-ink">{m.k}</dt>
+                      <dd className="mt-1 text-sm text-muted-foreground">{m.v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-bold">{w.dev.mapTitle}</h3>
-              <dl className="mt-3 flex flex-col divide-y rounded-2xl border bg-card">
-                {w.dev.map.map((m) => (
-                  <div key={m.k} className="p-4">
-                    <dt className="font-mono text-xs font-semibold text-primary-ink">{m.k}</dt>
-                    <dd className="mt-1 text-sm text-muted-foreground">{m.v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </div>
+          </details>
         </div>
       </section>
 
       {/* CTA */}
       <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6">
         <div className="flex flex-col items-start gap-6 rounded-3xl border bg-card p-8 sm:p-10 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-display sm:text-3xl">{w.cta.title}</h2>
-            <p className="mt-2 max-w-[56ch] text-muted-foreground">{w.cta.body}</p>
-          </div>
+          <h2 className="text-2xl font-bold tracking-display sm:text-3xl">{w.cta.title}</h2>
           <Button asChild size="lg" className="shrink-0">
             <Link href={href(locale, "/app")}>
               {w.cta.button}
