@@ -205,9 +205,7 @@ function ScheduleTable({ vault, now }: { vault: Vault; now: number }) {
   const stop = vault.revokedAt ? new Date(vault.revokedAt).getTime() : Infinity
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground">
-        {app.kinds[vault.schedule.kind]} · {scheduleLine(vault, app, locale)}
-      </p>
+      <p className="text-sm text-muted-foreground">{scheduleLine(vault, app, locale)}</p>
       {vault.schedule.kind === "linear" ? <p className="text-xs text-muted-foreground">{tb.checkpoints}</p> : null}
       <div className="overflow-x-auto rounded-2xl border bg-card">
         <table className="w-full min-w-[30rem] text-sm">
@@ -256,7 +254,7 @@ function Terms({ vault }: { vault: Vault }) {
   const { app, locale } = useAppCopy()
   const tm = app.vault.terms
   const rows: [string, React.ReactNode][] = [
-    [tm.kind, `${app.kinds[vault.schedule.kind]} · ${scheduleLine(vault, app, locale)}`],
+    [tm.kind, scheduleLine(vault, app, locale)],
     [tm.token, vault.token],
     [tm.start, formatDateTime(vault.schedule.start, locale)],
     [tm.end, formatDateTime(vault.schedule.end, locale)],
