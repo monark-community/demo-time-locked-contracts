@@ -22,7 +22,8 @@ const en = {
   common: {
     product: "TimeVault",
     byMonark: "by Monark",
-    homeLabel: "TimeVault by Monark, home",
+    homeLabel: "TimeVault, by Monark: home",
+    demoChip: "Demo",
     skip: "Skip to content",
     nav: {
       overview: "Overview",
@@ -43,6 +44,7 @@ const en = {
     footer: {
       product: "TimeVault locks promised funds in a contract and releases them on a schedule everyone can see.",
       productNav: "TimeVault",
+      builtBy: "TimeVault is built by Monark",
       tagline: "Fostering Collaboration within the Web3 Community",
       monarkHome: "Monark home page",
       projectPage: "Project page on monark.io",
@@ -442,7 +444,7 @@ const en = {
       activity: {
         filters: { all: "All", locked: "Locks", claimed: "Claims", approved: "Approvals", revoked: "Revocations" },
         filterLabel: "Filter activity",
-        kinds: { locked: "Funds locked", claimed: "Claimed", approved: "Release approved", revoked: "Revoked", unlocked: "Unlocked by schedule" },
+        kinds: { locked: "Funds locked", claimed: "Claimed", approved: "Reviewer approved", revoked: "Revoked", unlocked: "Unlocked by schedule" },
         bySchedule: "by the schedule",
         export: "Export CSV",
         empty: "Nothing has happened since the funds were locked.",

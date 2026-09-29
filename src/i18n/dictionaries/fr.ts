@@ -23,7 +23,8 @@ const fr: Dictionary = {
   common: {
     product: "TimeVault",
     byMonark: "par Monark",
-    homeLabel: "TimeVault par Monark, accueil",
+    homeLabel: "TimeVault, par Monark : accueil",
+    demoChip: "Démo",
     skip: "Aller au contenu",
     nav: {
       overview: "Aperçu",
@@ -44,6 +45,7 @@ const fr: Dictionary = {
     footer: {
       product: "TimeVault verrouille les fonds promis dans un contrat et les libère selon un calendrier visible par tous.",
       productNav: "TimeVault",
+      builtBy: "TimeVault est conçu par Monark",
       tagline: "Favoriser la collaboration au sein de la communauté Web3",
       monarkHome: "Accueil de Monark",
       projectPage: "Page du projet sur monark.io",
@@ -443,7 +445,7 @@ const fr: Dictionary = {
       activity: {
         filters: { all: "Tout", locked: "Verrouillages", claimed: "Réclamations", approved: "Approbations", revoked: "Révocations" },
         filterLabel: "Filtrer l'activité",
-        kinds: { locked: "Fonds verrouillés", claimed: "Réclamé", approved: "Libération approuvée", revoked: "Révoqué", unlocked: "Débloqué par le calendrier" },
+        kinds: { locked: "Fonds verrouillés", claimed: "Réclamé", approved: "Approbation d'un réviseur", revoked: "Révoqué", unlocked: "Débloqué par le calendrier" },
         bySchedule: "par le calendrier",
         export: "Exporter en CSV",
         empty: "Rien ne s'est passé depuis le verrouillage des fonds.",
