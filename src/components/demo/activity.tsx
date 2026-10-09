@@ -5,6 +5,8 @@ import Link from "next/link"
 import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
+import { Empty, EmptyDescription } from "@/components/ui/empty"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { href } from "@/i18n/config"
 import type { AuditKind, Vault } from "@/lib/demo/types"
 import { tranches } from "@/lib/demo/vesting"
@@ -132,22 +134,21 @@ export function ActivityLog({ vault, now }: { vault: Vault; now: number }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div role="group" aria-label={a.filterLabel} className="flex flex-wrap gap-1.5">
+        <ToggleGroup
+          type="single"
+          variant="chip"
+          size="sm"
+          aria-label={a.filterLabel}
+          value={filter}
+          onValueChange={(f) => f && setFilter(f as Filter)}
+          className="gap-1.5"
+        >
           {filters.map((f) => (
-            <button
-              key={f}
-              type="button"
-              aria-pressed={filter === f}
-              onClick={() => setFilter(f)}
-              className={cn(
-                "h-9 rounded-full border px-3.5 text-sm font-semibold transition-colors",
-                filter === f ? "border-foreground bg-foreground text-background" : "border-input hover:bg-muted"
-              )}
-            >
+            <ToggleGroupItem key={f} value={f}>
               {a.filters[f]}
-            </button>
+            </ToggleGroupItem>
           ))}
-        </div>
+        </ToggleGroup>
         <Button variant="outline" size="sm" onClick={exportCsv}>
           <DownloadIcon aria-hidden="true" />
           {a.export}
@@ -155,9 +156,9 @@ export function ActivityLog({ vault, now }: { vault: Vault; now: number }) {
       </div>
 
       {rows.length === 0 ? (
-        <p className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-          {all.length <= 1 && filter === "all" ? a.empty : a.emptyFilter}
-        </p>
+        <Empty size="sm" role="status">
+          <EmptyDescription>{all.length <= 1 && filter === "all" ? a.empty : a.emptyFilter}</EmptyDescription>
+        </Empty>
       ) : (
         <ol className="flex flex-col divide-y rounded-2xl border bg-card">
           {rows.map((r) => {

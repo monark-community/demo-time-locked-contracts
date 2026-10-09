@@ -74,13 +74,13 @@ export function VaultBar({ vault, now, className }: { vault: Vault; now: number;
   )
 }
 
-/** Live countdown, e.g. 3d 04h 12min 09s, in tabular numerals. */
+/** Live countdown, e.g. 3d 04h 12min 09s, in tnum numerals. */
 export function Countdown({ target, now, app, className }: { target: number; now: number; app: App; className?: string }) {
   const c = app.countdown
   const { d, h, m, s } = countdownParts(target - now)
   const pad = (n: number) => n.toString().padStart(2, "0")
   return (
-    <span className={cn("tabular inline-flex items-baseline gap-1 font-bold", className)}>
+    <span className={cn("tnum inline-flex items-baseline gap-1 font-bold", className)}>
       {d > 0 ? (
         <span>
           {d}
@@ -122,5 +122,5 @@ export function Amount({
   wrap?: boolean
 }) {
   const digits = frac ?? (TOKENS[token].usd > 100 ? 4 : 2)
-  return <span className={cn("tabular", !wrap && "whitespace-nowrap", className)}>{formatToken(value, token, locale, digits)}</span>
+  return <span className={cn("tnum", !wrap && "whitespace-nowrap", className)}>{formatToken(value, token, locale, digits)}</span>
 }

@@ -4,8 +4,10 @@ import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, LockIcon, LockOpenIcon, XIcon
 import Link from "next/link"
 import { useState } from "react"
 
+import { AppLoading } from "@/components/ui/app-loading"
 import { Button } from "@/components/ui/button"
 import { NetworkBadge } from "@/components/ui/network-badge"
+import { Stat, StatGroup, StatHint, StatLabel, StatValue } from "@/components/ui/stat"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Wallet, WalletAddress } from "@/components/ui/wallet"
 import { href } from "@/i18n/config"
@@ -19,7 +21,6 @@ import { formatDateLong, formatDateTime, formatToken } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 import { ActivityLog } from "./activity"
-import { AppLoading } from "./app-frame"
 import { useAppCopy } from "./app-provider"
 import { Amount, Countdown, scheduleLine, StatusBadge, VaultBar } from "./bits"
 import { ScheduleExplorer } from "./schedule-explorer"
@@ -85,39 +86,36 @@ export function VaultView({ id }: { id: string }) {
         </div>
       </div>
 
-      <section aria-label={v.figures.total} className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <StatGroup aria-label={v.figures.total} className="grid-cols-2 lg:grid-cols-5">
         <Figure label={v.figures.total}>
           <Amount value={vault.total} token={vault.token} locale={locale} />
         </Figure>
-        <Figure label={v.figures.unlocked}>
+        <Figure label={v.figures.unlocked} hint={t(v.figures.claimed, { amount: formatToken(vault.claimed, vault.token, locale) })}>
           <Amount value={unlocked} token={vault.token} locale={locale} />
-          <span className="block text-xs font-semibold text-muted-foreground">
-            {t(v.figures.claimed, { amount: formatToken(vault.claimed, vault.token, locale) })}
-          </span>
         </Figure>
         <Figure label={v.figures.claimable} emphasis={claimable > 0n}>
           <Amount value={claimable} token={vault.token} locale={locale} />
         </Figure>
-        <Figure label={v.figures.locked}>
+        <Figure
+          label={v.figures.locked}
+          hint={BigInt(vault.returned) > 0n ? t(v.figures.returned, { amount: formatToken(vault.returned, vault.token, locale) }) : undefined}
+        >
           <Amount value={locked > 0n ? locked : 0n} token={vault.token} locale={locale} />
-          {BigInt(vault.returned) > 0n ? (
-            <span className="block text-xs font-semibold text-muted-foreground">
-              {t(v.figures.returned, { amount: formatToken(vault.returned, vault.token, locale) })}
-            </span>
-          ) : null}
         </Figure>
-        <div className="col-span-2 flex flex-col justify-between gap-1 rounded-2xl border bg-card p-4 lg:col-span-1">
-          <p className="text-xs font-bold text-muted-foreground">{app.countdown.label}</p>
+        <Stat className="col-span-2 lg:col-span-1">
+          <StatLabel>{app.countdown.label}</StatLabel>
           {next && !next.continuous ? (
-            <div>
-              <Countdown target={new Date(next.at).getTime()} now={now} app={app} className="text-xl" />
-              <p className="text-xs text-muted-foreground">{formatDateLong(next.at, locale)}</p>
-            </div>
+            <>
+              <StatValue className="text-xl sm:text-xl">
+                <Countdown target={new Date(next.at).getTime()} now={now} app={app} />
+              </StatValue>
+              <StatHint>{formatDateLong(next.at, locale)}</StatHint>
+            </>
           ) : (
-            <p className="text-sm font-bold">{next?.continuous ? app.countdown.continuous : app.countdown.none}</p>
+            <StatValue className="text-sm sm:text-sm">{next?.continuous ? app.countdown.continuous : app.countdown.none}</StatValue>
           )}
-        </div>
-      </section>
+        </Stat>
+      </StatGroup>
 
       <div>
         <VaultBar vault={vault} now={now} className="h-3" />
@@ -177,12 +175,13 @@ function PartyChip({ label, party, you }: { label: string; party: Party; you: bo
   )
 }
 
-function Figure({ label, children, emphasis }: { label: string; children: React.ReactNode; emphasis?: boolean }) {
+function Figure({ label, hint, children, emphasis }: { label: string; hint?: string; children: React.ReactNode; emphasis?: boolean }) {
   return (
-    <div className={cn("flex flex-col justify-between gap-1 rounded-2xl border bg-card p-4", emphasis && "border-primary")}>
-      <p className="text-xs font-bold text-muted-foreground">{label}</p>
-      <div className="text-lg font-extrabold sm:text-xl">{children}</div>
-    </div>
+    <Stat className={cn(emphasis && "border-primary")}>
+      <StatLabel>{label}</StatLabel>
+      <StatValue className="text-lg sm:text-xl">{children}</StatValue>
+      {hint ? <StatHint className="font-semibold">{hint}</StatHint> : null}
+    </Stat>
   )
 }
 
@@ -225,7 +224,7 @@ function ScheduleTable({ vault, now }: { vault: Vault; now: number }) {
               const cumulative = scheduleUnlocked(vault.schedule, BigInt(vault.total), at)
               return (
                 <tr key={r.index} className={cn(cancelled && "text-muted-foreground line-through")}>
-                  <td className="px-4 py-2.5 tabular">{r.index}</td>
+                  <td className="px-4 py-2.5 tnum">{r.index}</td>
                   <td className="px-4 py-2.5 whitespace-nowrap">{formatDateTime(r.at, locale)}</td>
                   <td className="px-4 py-2.5 text-right">
                     <Amount value={r.amount} token={vault.token} locale={locale} />
@@ -265,7 +264,7 @@ function Terms({ vault }: { vault: Vault }) {
       app.vault.contract,
       <span key="c" className="flex flex-wrap items-center gap-2">
         <WalletAddress address={vault.address} className="text-sm" />
-        <NetworkBadge name={NETWORK_NAME} variant="outline" icon={<span className="block size-full rounded-full bg-success" />} />
+        <NetworkBadge name={NETWORK_NAME} variant="outline" status="live" />
       </span>,
     ],
   ]

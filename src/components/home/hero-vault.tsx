@@ -107,11 +107,11 @@ export function HeroVault({ locale, copy }: { locale: Locale; copy: Dictionary["
       <div className="mt-5 grid grid-cols-2 gap-3 border-t pt-4">
         <div>
           <p className="text-xs font-bold text-muted-foreground">{copy.unlocked}</p>
-          <p className="text-xl font-extrabold tabular sm:text-2xl">{formatToken(unlocked, "tUSDC", locale)}</p>
+          <p className="text-xl font-extrabold tnum sm:text-2xl">{formatToken(unlocked, "tUSDC", locale)}</p>
         </div>
         <div>
           <p className="text-xs font-bold text-muted-foreground">{copy.locked}</p>
-          <p className="text-xl font-extrabold text-muted-foreground tabular sm:text-2xl">{formatToken(locked, "tUSDC", locale)}</p>
+          <p className="text-xl font-extrabold text-muted-foreground tnum sm:text-2xl">{formatToken(locked, "tUSDC", locale)}</p>
         </div>
       </div>
       <p aria-hidden="true" className="mt-3 text-sm font-semibold text-primary-ink">

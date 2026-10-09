@@ -1,11 +1,13 @@
-import { ArrowRightIcon, HourglassIcon, LockIcon, LockOpenIcon, PlusIcon, UndoDotIcon, UserCheckIcon, WalletIcon } from "lucide-react"
+import { ArrowRightIcon, HourglassIcon, LockIcon, LockOpenIcon, UndoDotIcon, UserCheckIcon, WalletIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
 import { ScheduleChart } from "@/components/charts/schedule-chart"
-import { SectionDivider } from "@/components/site/section-divider"
 import { Button } from "@/components/ui/button"
+import { Disclosure } from "@/components/ui/disclosure"
+import { SectionDivider } from "@/components/ui/section-divider"
+import { SectionHeading } from "@/components/ui/section-heading"
 import { href, isLocale } from "@/i18n/config"
 import { getDictionary } from "@/i18n"
 import type { Schedule } from "@/lib/demo/types"
@@ -69,9 +71,7 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
 
       {/* Life of a vault */}
       <section aria-labelledby="life-title" className="mx-auto w-full max-w-6xl px-4 pb-16 sm:px-6">
-        <h2 id="life-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
-          {w.life.title}
-        </h2>
+        <SectionHeading titleId="life-title" title={w.life.title} />
         <figure aria-label={w.life.diagramLabel} className="mt-8">
           <ol className="relative grid gap-6 md:grid-cols-4 md:gap-4">
             <span aria-hidden="true" className="absolute top-6 right-[12%] left-[12%] hidden h-0.5 bg-primary md:block" />
@@ -110,10 +110,7 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
       {/* Schedules */}
       <section aria-labelledby="sched-title" className="border-y bg-secondary/50">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <h2 id="sched-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
-            {w.schedules.title}
-          </h2>
-          <p className="mt-3 max-w-[68ch] text-muted-foreground">{w.schedules.body}</p>
+          <SectionHeading titleId="sched-title" title={w.schedules.title} lead={w.schedules.body} />
           <ul className="mt-8 grid gap-4 lg:grid-cols-3">
             {w.schedules.items.map((s, i) => (
               <li key={s.title} className="flex flex-col rounded-3xl border bg-card p-6">
@@ -136,9 +133,7 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
 
       {/* Conditions */}
       <section aria-labelledby="cond-title" className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6">
-        <h2 id="cond-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
-          {w.conditions.title}
-        </h2>
+        <SectionHeading titleId="cond-title" title={w.conditions.title} />
         <div className="mt-8 grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
           <dl className="flex flex-col gap-6">
             {w.conditions.items.map((c) => (
@@ -178,7 +173,7 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
         </div>
       </section>
 
-      <SectionDivider />
+      <SectionDivider contained />
 
       {/* Claim + time */}
       <section className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2">
@@ -195,16 +190,9 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
       {/* Developers */}
       <section aria-labelledby="dev-title" className="border-t bg-secondary/50">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
-          <h2 id="dev-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
-            {w.dev.title}
-          </h2>
-          <p className="mt-3 max-w-[68ch] text-muted-foreground">{w.dev.body}</p>
-          <details className="group mt-6">
-            <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 font-bold text-primary-ink [&::-webkit-details-marker]:hidden">
-              <PlusIcon className="size-4 transition-transform duration-200 group-open:rotate-45" aria-hidden="true" />
-              {w.dev.show}
-            </summary>
-            <div className="mt-6 grid gap-8 lg:grid-cols-[1.25fr_1fr]">
+          <SectionHeading titleId="dev-title" title={w.dev.title} lead={w.dev.body} />
+          <Disclosure variant="pill" summary={w.dev.show} className="mt-6" contentClassName="pt-6">
+            <div className="grid gap-8 lg:grid-cols-[1.25fr_1fr]">
               <div className="min-w-0">
                 <h3 className="text-sm font-bold">{w.dev.interfaceTitle}</h3>
                 <pre className="mt-3 overflow-x-auto rounded-2xl border bg-card p-4 text-[0.8125rem] leading-relaxed">
@@ -223,7 +211,7 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
                 </dl>
               </div>
             </div>
-          </details>
+          </Disclosure>
         </div>
       </section>
 
@@ -231,7 +219,7 @@ export default async function HowItWorksPage({ params }: PageProps<"/[locale]/ho
       <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6">
         <div className="flex flex-col items-start gap-6 rounded-3xl border bg-card p-8 sm:p-10 md:flex-row md:items-center md:justify-between">
           <h2 className="text-2xl font-bold tracking-display sm:text-3xl">{w.cta.title}</h2>
-          <Button asChild size="lg" className="shrink-0">
+          <Button asChild size="lg">
             <Link href={href(locale, "/app")}>
               {w.cta.button}
               <ArrowRightIcon aria-hidden="true" />

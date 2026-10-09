@@ -3,7 +3,10 @@
 import { ArrowRightIcon, CalendarClockIcon, PlusIcon } from "lucide-react"
 import Link from "next/link"
 
+import { AppLoading } from "@/components/ui/app-loading"
 import { Button } from "@/components/ui/button"
+import { Empty, EmptyDescription } from "@/components/ui/empty"
+import { Stat, StatGroup, StatHint, StatLabel, StatValue } from "@/components/ui/stat"
 import { href } from "@/i18n/config"
 import { t } from "@/i18n/t"
 import { useDemo, useNow } from "@/lib/demo/store"
@@ -11,9 +14,9 @@ import { TOKEN_LIST } from "@/lib/demo/tokens"
 import type { TokenSymbol, Vault } from "@/lib/demo/types"
 import { claimableAt, isFunder, isRecipient, lockedAt, nextUnlock, statusAt, tranches } from "@/lib/demo/vesting"
 import { formatDateShort, formatRelative } from "@/lib/format"
+import { cn } from "@/lib/utils"
 
 import { ActivityFeed } from "./activity"
-import { AppLoading } from "./app-frame"
 import { useAppCopy } from "./app-provider"
 import { Amount, Countdown, scheduleLine, StatusBadge, VaultBar } from "./bits"
 
@@ -77,27 +80,33 @@ export function Dashboard() {
         </Button>
       </header>
 
-      <section aria-label={d.title} className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-3 lg:grid-cols-[repeat(4,minmax(0,1fr))]">
+      <StatGroup aria-label={d.title} className="grid-cols-2">
         <SummaryCard label={d.summary.claimable} totals={claimable} emphasis />
         <SummaryCard label={d.summary.lockedOthers} totals={lockedOthers} />
-        <div className="col-span-2 flex flex-col justify-between gap-2 rounded-2xl border bg-card p-4 lg:col-span-1">
-          <p className="text-xs font-bold text-muted-foreground">{d.summary.next}</p>
+        <Stat className="col-span-2 lg:col-span-1">
+          <StatLabel>{d.summary.next}</StatLabel>
           {next ? (
-            <div className="min-w-0">
-              <Countdown target={next.at} now={now} app={app} className="text-xl" />
-              <Link href={href(locale, `/app/vault/${next.vault.id}`)} className="mt-1 block truncate text-sm font-semibold underline-offset-4 hover:underline">
-                {next.vault.name}
-              </Link>
-            </div>
+            <>
+              <StatValue className="text-xl sm:text-xl">
+                <Countdown target={next.at} now={now} app={app} />
+              </StatValue>
+              <StatHint className="min-w-0">
+                <Link href={href(locale, `/app/vault/${next.vault.id}`)} className="block truncate text-sm font-semibold text-foreground underline-offset-4 hover:underline">
+                  {next.vault.name}
+                </Link>
+              </StatHint>
+            </>
           ) : (
-            <p className="text-lg font-bold text-muted-foreground">{d.summary.nextNone}</p>
+            <StatValue className="text-lg text-muted-foreground sm:text-lg">{d.summary.nextNone}</StatValue>
           )}
-        </div>
+        </Stat>
         <SummaryCard label={d.summary.released} totals={released} className="col-span-2 lg:col-span-1" />
-      </section>
+      </StatGroup>
 
       {demo.vaults.length === 0 ? (
-        <p className="rounded-2xl border border-dashed p-8 text-center text-muted-foreground">{d.empty}</p>
+        <Empty>
+          <EmptyDescription>{d.empty}</EmptyDescription>
+        </Empty>
       ) : (
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="flex min-w-0 flex-col gap-8">
@@ -153,22 +162,17 @@ function SummaryCard({ label, totals, emphasis, className }: { label: string; to
   const { locale } = useAppCopy()
   const entries = TOKEN_LIST.filter((tk) => (totals[tk] ?? 0n) > 0n)
   return (
-    <div className={`flex min-w-0 flex-col justify-between gap-2 rounded-2xl border bg-card p-4 ${emphasis ? "border-primary/60" : ""} ${className ?? ""}`}>
-      <p className="text-xs font-bold text-muted-foreground">{label}</p>
-      <div className="flex flex-col">
-        {entries.length === 0 ? <span className="text-xl font-extrabold">0</span> : null}
-        {entries.map((tk, i) => (
-          <Amount
-            key={tk}
-            value={totals[tk]!}
-            token={tk}
-            locale={locale}
-            wrap
-            className={i === 0 ? "text-lg font-extrabold sm:text-xl" : "text-sm font-bold text-muted-foreground"}
-          />
-        ))}
-      </div>
-    </div>
+    <Stat className={cn(emphasis && "border-primary/60", className)}>
+      <StatLabel>{label}</StatLabel>
+      <StatValue className="text-lg sm:text-xl">
+        {entries.length === 0 ? "0" : <Amount value={totals[entries[0]!]!} token={entries[0]!} locale={locale} wrap />}
+      </StatValue>
+      {entries.slice(1).map((tk) => (
+        <StatHint key={tk} className="text-sm font-bold">
+          <Amount value={totals[tk]!} token={tk} locale={locale} wrap />
+        </StatHint>
+      ))}
+    </Stat>
   )
 }
 
@@ -181,7 +185,9 @@ function VaultSection({ title, empty, vaults, now, incoming }: { title: string; 
         <span className="text-sm font-semibold text-muted-foreground">{vaults.length}</span>
       </h2>
       {vaults.length === 0 ? (
-        <p className="mt-3 rounded-2xl border border-dashed p-6 text-sm text-muted-foreground">{empty}</p>
+        <Empty align="start" size="sm" className="mt-3">
+          <EmptyDescription>{empty}</EmptyDescription>
+        </Empty>
       ) : (
         <ul className="mt-3 flex flex-col gap-3">
           {vaults.map((v) => (
