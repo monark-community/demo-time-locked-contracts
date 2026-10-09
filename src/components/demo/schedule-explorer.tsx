@@ -104,7 +104,6 @@ export function ScheduleExplorer({ vault, now }: { vault: Vault; now: number }) 
           <Button
             variant={previewing ? "default" : "outline"}
             disabled={!previewing}
-            className="shrink-0"
             onClick={() => {
               // The chart, figures and padlocks update in place; the readout (aria-live) announces the new day.
               advanceClock(p - now)

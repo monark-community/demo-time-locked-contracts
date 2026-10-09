@@ -63,7 +63,7 @@ export function DemoClock() {
         <ClockIcon className="size-3.5 shrink-0 text-primary" aria-hidden="true" />
         <span className="sr-only">{c.label}: </span>
         <span className="hidden font-semibold whitespace-nowrap text-muted-foreground sm:inline">{c.label}</span>
-        <span key={days} className="tv-rise truncate font-bold tabular">
+        <span key={days} className="tv-rise truncate font-bold tnum">
           <span className="sm:hidden">{formatDateShort(now, locale)}</span>
           <span className="hidden sm:inline">
             {formatDateLong(now, locale)} · {time}
@@ -75,7 +75,7 @@ export function DemoClock() {
       </p>
       <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="sm" className="shrink-0">
+          <Button variant="outline" size="sm">
             <FastForwardIcon aria-hidden="true" />
             {c.forward}
           </Button>

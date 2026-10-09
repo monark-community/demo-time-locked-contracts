@@ -2,14 +2,17 @@
 
 import { Loader2Icon, LockKeyholeIcon, WalletIcon, XCircleIcon } from "lucide-react"
 import type { ReactNode } from "react"
+import { toast } from "sonner"
 
+import { AppLoading } from "@/components/ui/app-loading"
 import { Button } from "@/components/ui/button"
-import { useDemo, useStorageOk } from "@/lib/demo/store"
+import { DemoControls } from "@/components/ui/demo-controls"
+import { resetDemo, setSettings, useDemo, useStorageOk } from "@/lib/demo/store"
+import { NETWORK_NAME } from "@/lib/demo/tokens"
 import { connectWallet } from "@/lib/demo/wallet"
 
 import { useAppCopy } from "./app-provider"
 import { DemoClock } from "./demo-clock"
-import { DemoControls } from "./demo-controls"
 
 /**
  * One compact app bar under the site header: the demo clock, and one pill that
@@ -19,7 +22,8 @@ import { DemoControls } from "./demo-controls"
 export function AppFrame({ children }: { children: ReactNode }) {
   const demo = useDemo()
   const storageOk = useStorageOk()
-  const { app } = useAppCopy()
+  const { app, seed, locale } = useAppCopy()
+  const c = app.controls
 
   return (
     <div className="flex flex-1 flex-col">
@@ -30,9 +34,34 @@ export function AppFrame({ children }: { children: ReactNode }) {
               <DemoClock />
             </div>
           ) : null}
-          <div className="ml-auto">
-            <DemoControls />
-          </div>
+          {demo ? (
+            <div className="ml-auto">
+              <DemoControls
+                networkName={NETWORK_NAME}
+                slow={demo.settings.slow}
+                onSlowChange={(slow) => setSettings({ slow })}
+                failNext={demo.settings.failNext}
+                onFailNextChange={(failNext) => setSettings({ failNext })}
+                onReset={() => {
+                  resetDemo(seed, locale)
+                  toast.success(c.resetDone)
+                }}
+                title={c.title}
+                openLabel={c.open}
+                slowLabel={c.slow}
+                slowHint={c.slowHint}
+                failNextLabel={c.failNext}
+                failNextHint={c.failNextHint}
+                resetLabel={c.reset}
+                resetHint={c.resetHint}
+                resetConfirmTitle={c.resetConfirm}
+                resetConfirmBody={c.resetConfirmBody}
+                resetConfirmLabel={c.resetDo}
+                cancelLabel={c.cancel}
+                closeLabel={app.close}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
       {!storageOk ? (
@@ -43,22 +72,6 @@ export function AppFrame({ children }: { children: ReactNode }) {
       <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col px-4 py-8 sm:px-6 lg:py-10">
         {!demo ? <AppLoading label={app.loading} /> : demo.wallet.status !== "connected" ? <ConnectGate /> : children}
       </div>
-    </div>
-  )
-}
-
-export function AppLoading({ label }: { label: string }) {
-  return (
-    <div role="status" aria-live="polite" className="flex flex-col gap-4">
-      <span className="sr-only">{label}</span>
-      <div className="h-9 w-56 animate-pulse rounded-full bg-muted" />
-      <div className="grid gap-3 sm:grid-cols-4">
-        {[0, 1, 2, 3].map((i) => (
-          <div key={i} className="h-24 animate-pulse rounded-2xl bg-muted" />
-        ))}
-      </div>
-      <div className="h-40 animate-pulse rounded-2xl bg-muted" />
-      <div className="h-40 animate-pulse rounded-2xl bg-muted" />
     </div>
   )
 }

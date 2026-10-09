@@ -1,15 +1,22 @@
 "use client"
 
-import { AlertCircleIcon, CalendarIcon, CoinsIcon, LockIcon, SparklesIcon, TrendingUpIcon, UserIcon } from "lucide-react"
+import { CalendarIcon, CoinsIcon, LockIcon, SparklesIcon, TrendingUpIcon, UserIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useId, useState, type ReactNode } from "react"
 
 import { ScheduleChart } from "@/components/charts/schedule-chart"
+import { AppLoading } from "@/components/ui/app-loading"
 import { Button } from "@/components/ui/button"
+import { Empty, EmptyDescription } from "@/components/ui/empty"
+import { FieldError } from "@/components/ui/field-error"
 import { InfoTip } from "@/components/ui/info-tip"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
+import { RadioGroup, RadioGroupItem, RadioGroupItemTitle } from "@/components/ui/radio-group"
+import { Stat, StatGroup, StatLabel, StatValue } from "@/components/ui/stat"
 import { Switch } from "@/components/ui/switch"
+import { TxFeedback } from "@/components/ui/tx-feedback"
 import { href } from "@/i18n/config"
 import { t } from "@/i18n/t"
 import { useTx } from "@/lib/demo/chain"
@@ -22,10 +29,8 @@ import { addMonths, tranches } from "@/lib/demo/vesting"
 import { formatDateLong, formatDateShort, formatToken } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
-import { AppLoading } from "./app-frame"
-import { useAppCopy } from "./app-provider"
+import { useAppCopy, useTxLabels } from "./app-provider"
 import { Amount, scheduleLine } from "./bits"
-import { TxFeedback } from "./tx-feedback"
 
 type TemplateKey = "grant" | "stipend" | "bounty" | "pledge" | "blank"
 
@@ -302,18 +307,13 @@ function ComposerForm({ today }: { today: number }) {
           <Fieldset legend={c.sections.amount} icon={<CoinsIcon className="size-4" aria-hidden="true" />}>
             <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
               <Field id={fid("token")} label={c.fields.token}>
-                <select
-                  id={fid("token")}
-                  value={form.token}
-                  onChange={(e) => set("token", e.target.value as TokenSymbol)}
-                  className="h-10 w-full rounded-full border border-input bg-transparent px-4 text-sm font-semibold"
-                >
+                <NativeSelect id={fid("token")} value={form.token} onChange={(e) => set("token", e.target.value as TokenSymbol)} className="w-full">
                   {TOKEN_LIST.map((tk) => (
-                    <option key={tk} value={tk}>
+                    <NativeSelectOption key={tk} value={tk}>
                       {tk}
-                    </option>
+                    </NativeSelectOption>
                   ))}
-                </select>
+                </NativeSelect>
               </Field>
               <Field id={fid("amount")} label={c.fields.amount} error={show("amount")}>
                 <div className="flex gap-2">
@@ -322,12 +322,12 @@ function ComposerForm({ today }: { today: number }) {
                     inputMode="decimal"
                     value={form.amount}
                     placeholder="0"
-                    className="tabular"
+                    className="tnum"
                     onChange={(e) => set("amount", e.target.value)}
                     aria-invalid={!!show("amount")}
                     aria-describedby={`${fid("amount")}-bal${show("amount") ? ` ${fid("amount")}-err` : ""}`}
                   />
-                  <Button type="button" variant="outline" className="shrink-0" onClick={() => set("amount", formatToken(balance, form.token, "en", 6).replace(/[^\d.]/g, ""))}>
+                  <Button type="button" variant="outline" onClick={() => set("amount", formatToken(balance, form.token, "en", 6).replace(/[^\d.]/g, ""))}>
                     {c.fields.max}
                   </Button>
                 </div>
@@ -339,22 +339,19 @@ function ComposerForm({ today }: { today: number }) {
           </Fieldset>
 
           <Fieldset legend={c.sections.schedule} icon={<CalendarIcon className="size-4" aria-hidden="true" />}>
-            <div role="group" aria-label={c.fields.kind} className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <RadioGroup
+              variant="card"
+              aria-label={c.fields.kind}
+              value={form.kind}
+              onValueChange={(k) => set("kind", k as ScheduleKind)}
+              className="grid-cols-1 sm:grid-cols-3"
+            >
               {kinds.map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  aria-pressed={form.kind === k}
-                  onClick={() => set("kind", k)}
-                  className={cn(
-                    "rounded-2xl border p-3 text-left text-sm transition-colors",
-                    form.kind === k ? "border-primary bg-primary/10 font-bold" : "hover:border-input"
-                  )}
-                >
-                  {app.kinds[k]}
-                </button>
+                <RadioGroupItem key={k} value={k}>
+                  <RadioGroupItemTitle>{app.kinds[k]}</RadioGroupItemTitle>
+                </RadioGroupItem>
               ))}
-            </div>
+            </RadioGroup>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field id={fid("start")} label={c.fields.start} error={show("start")}>
                 <Input id={fid("start")} type="date" min={dateInput(now)} value={form.start} onChange={(e) => set("start", e.target.value)} aria-invalid={!!show("start")} />
@@ -416,16 +413,16 @@ function ComposerForm({ today }: { today: number }) {
                     { at: new Date(schedule.end).getTime(), label: formatDateShort(schedule.end, locale) },
                   ]}
                 />
-                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <dt className="text-xs font-bold text-muted-foreground">{c.preview.firstUnlock}</dt>
-                    <dd className="font-semibold">{previewTranches[0] ? formatDateShort(previewTranches[0].at, locale) : "–"}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs font-bold text-muted-foreground">{c.preview.fullyUnlocked}</dt>
-                    <dd className="font-semibold">{formatDateShort(schedule.end, locale)}</dd>
-                  </div>
-                </dl>
+                <StatGroup className="mt-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-2">
+                  <Stat variant="plain" size="sm">
+                    <StatLabel>{c.preview.firstUnlock}</StatLabel>
+                    <StatValue>{previewTranches[0] ? formatDateShort(previewTranches[0].at, locale) : "–"}</StatValue>
+                  </Stat>
+                  <Stat variant="plain" size="sm">
+                    <StatLabel>{c.preview.fullyUnlocked}</StatLabel>
+                    <StatValue>{formatDateShort(schedule.end, locale)}</StatValue>
+                  </Stat>
+                </StatGroup>
                 {schedule.kind !== "linear" ? (
                   <div className="mt-4">
                     <h3 className="text-xs font-bold text-muted-foreground">{c.preview.upcoming}</h3>
@@ -442,7 +439,9 @@ function ComposerForm({ today }: { today: number }) {
                 ) : null}
               </>
             ) : (
-              <p className="mt-3 rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">{c.preview.empty}</p>
+              <Empty size="sm" className="mt-3">
+                <EmptyDescription>{c.preview.empty}</EmptyDescription>
+              </Empty>
             )}
           </div>
           <div className="hidden flex-col gap-3 lg:flex">
@@ -469,6 +468,7 @@ function SubmitArea({
 }) {
   const { app, locale } = useAppCopy()
   const c = app.composer
+  const txLabels = useTxLabels()
   const label = amount && amount > 0n ? t(c.submit, { amount: formatToken(amount, token, locale) }) : c.submitIdle
   return (
     <>
@@ -476,7 +476,14 @@ function SubmitArea({
         <LockIcon aria-hidden="true" />
         {label}
       </Button>
-      <TxFeedback state={tx.state} pendingLabel={c.pending} revertedLabel={c.failed} onRetry={onRetry} onDismiss={tx.reset} />
+      <TxFeedback
+        {...txLabels}
+        {...tx.state}
+        pendingLabel={c.pending}
+        reasons={{ ...txLabels.reasons, reverted: c.failed }}
+        onRetry={onRetry}
+        onDismiss={tx.reset}
+      />
     </>
   )
 }
@@ -497,22 +504,15 @@ function Field({ id, label, info, error, children }: { id: string; label: string
   return (
     <div className="flex min-w-0 flex-col gap-1.5">
       <div className="flex min-h-5 items-center gap-1">
-        <Label htmlFor={id} className="text-sm font-bold">
-          {label}
-        </Label>
+        <Label htmlFor={id}>{label}</Label>
         {info ? (
-          <InfoTip label={label} className="-my-2 size-8">
+          <InfoTip label={label} className="-my-2">
             {info}
           </InfoTip>
         ) : null}
       </div>
       {children}
-      {error ? (
-        <p id={`${id}-err`} role="alert" className="flex items-start gap-1.5 text-xs font-semibold text-destructive">
-          <AlertCircleIcon className="mt-px size-3.5 shrink-0" aria-hidden="true" />
-          {error}
-        </p>
-      ) : null}
+      <FieldError id={`${id}-err`}>{error}</FieldError>
     </div>
   )
 }
@@ -521,9 +521,7 @@ function Toggle({ id, label, hint, checked, onChange }: { id: string; label: str
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
-        <Label htmlFor={id} className="text-sm font-bold">
-          {label}
-        </Label>
+        <Label htmlFor={id}>{label}</Label>
         <p id={`${id}-hint`} className="mt-1 text-xs text-muted-foreground">
           {hint}
         </p>

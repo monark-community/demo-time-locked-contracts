@@ -1,4 +1,4 @@
-import { ArrowRightIcon, PlusIcon } from "lucide-react"
+import { ArrowRightIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
@@ -6,8 +6,10 @@ import { notFound } from "next/navigation"
 
 import { ScheduleChart } from "@/components/charts/schedule-chart"
 import { HeroVault } from "@/components/home/hero-vault"
-import { SectionDivider } from "@/components/site/section-divider"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Button } from "@/components/ui/button"
+import { SectionDivider } from "@/components/ui/section-divider"
+import { SectionHeading } from "@/components/ui/section-heading"
 import { href, isLocale } from "@/i18n/config"
 import { getDictionary } from "@/i18n"
 import type { Schedule } from "@/lib/demo/types"
@@ -58,10 +60,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         />
         <div className="relative mx-auto grid max-w-6xl gap-12 px-4 pt-12 pb-16 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:items-center lg:gap-14 lg:pt-20 lg:pb-24">
           <div>
-            <h1 id="hero-title" className="text-[2.25rem] leading-[1.06] font-extrabold tracking-display sm:text-5xl lg:text-[3.75rem]">
-              {h.title}
-            </h1>
-            <p className="mt-5 max-w-[34rem] text-lg text-muted-foreground sm:text-xl">{h.sub}</p>
+            <SectionHeading as="h1" size="lg" titleId="hero-title" title={h.title} lead={h.sub} />
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button asChild size="lg">
                 <Link href={href(locale, "/app")}>
@@ -81,9 +80,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
       {/* Schedules */}
       <section aria-labelledby="schedules-title" className="border-y bg-secondary/50">
         <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-          <h2 id="schedules-title" className="max-w-2xl text-3xl font-bold tracking-display sm:text-[2rem]">
-            {h.schedules.title}
-          </h2>
+          <SectionHeading titleId="schedules-title" title={h.schedules.title} className="max-w-2xl" />
           <ul className="mt-10 grid gap-4 md:grid-cols-3">
             {h.schedules.items.map((item, i) => (
               <li key={item.title} className="flex flex-col rounded-3xl border bg-card p-6">
@@ -112,9 +109,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
 
       {/* Who */}
       <section aria-labelledby="who-title" className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 lg:py-20">
-        <h2 id="who-title" className="max-w-2xl text-3xl font-bold tracking-display sm:text-[2rem]">
-          {h.who.title}
-        </h2>
+        <SectionHeading titleId="who-title" title={h.who.title} className="max-w-2xl" />
         <ul className="mt-10 grid gap-6 md:grid-cols-2">
           {h.who.items.map((item, i) => (
             <li
@@ -144,24 +139,19 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
         </ul>
       </section>
 
-      <SectionDivider />
+      <SectionDivider contained />
 
       {/* FAQ */}
       <section aria-labelledby="faq-title" className="mx-auto w-full max-w-3xl px-4 py-16 sm:px-6 lg:py-20">
-        <h2 id="faq-title" className="text-3xl font-bold tracking-display sm:text-[2rem]">
-          {h.faq.title}
-        </h2>
-        <div className="mt-8 divide-y border-y">
+        <SectionHeading titleId="faq-title" title={h.faq.title} />
+        <Accordion type="multiple" variant="plus" className="mt-8 border-y">
           {h.faq.items.map((item) => (
-            <details key={item.q} className="group py-1">
-              <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 rounded-lg py-3 text-lg font-bold [&::-webkit-details-marker]:hidden">
-                {item.q}
-                <PlusIcon className="size-5 shrink-0 text-primary transition-transform duration-200 group-open:rotate-45" aria-hidden="true" />
-              </summary>
-              <p className="max-w-[68ch] pb-5 text-muted-foreground">{item.a}</p>
-            </details>
+            <AccordionItem key={item.q} value={item.q} className="py-1">
+              <AccordionTrigger>{item.q}</AccordionTrigger>
+              <AccordionContent>{item.a}</AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </section>
 
       {/* Closing */}
@@ -170,7 +160,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]">) {
           <h2 id="closing-title" className="text-2xl font-bold tracking-display sm:text-3xl">
             {h.closing.title}
           </h2>
-          <Button asChild size="lg" className="shrink-0">
+          <Button asChild size="lg">
             <Link href={href(locale, "/app")}>
               {h.closing.cta}
               <ArrowRightIcon aria-hidden="true" />

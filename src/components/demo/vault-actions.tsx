@@ -5,6 +5,7 @@ import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { InfoTip } from "@/components/ui/info-tip"
+import { TxFeedback } from "@/components/ui/tx-feedback"
 import { t } from "@/i18n/t"
 import { useTx } from "@/lib/demo/chain"
 import { approveVault, claimVault, revokeVault } from "@/lib/demo/ops"
@@ -13,8 +14,7 @@ import type { Vault } from "@/lib/demo/types"
 import { approvalMet, claimableAt, entitlement, isFunder, isRecipient, nextUnlock, unlockedAt } from "@/lib/demo/vesting"
 import { formatDateLong, formatToken } from "@/lib/format"
 
-import { useAppCopy } from "./app-provider"
-import { TxFeedback } from "./tx-feedback"
+import { useAppCopy, useTxLabels } from "./app-provider"
 
 /** Everything you can do with a vault, depending on who you are in it. */
 export function VaultActions({ vault, now, me }: { vault: Vault; now: number; me: string }) {
@@ -40,6 +40,7 @@ function ClaimBlock({ vault, now, youReceive }: { vault: Vault; now: number; you
   const { app, locale } = useAppCopy()
   const a = app.vault.actions
   const tx = useTx()
+  const txLabels = useTxLabels()
   const claimable = claimableAt(vault, now)
   const unlocked = unlockedAt(vault, now)
   const next = nextUnlock(vault, now)
@@ -104,7 +105,7 @@ function ClaimBlock({ vault, now, youReceive }: { vault: Vault; now: number; you
         </>
       )}
       {reason && !youReceive ? <p className="text-sm text-muted-foreground">{reason}</p> : null}
-      <TxFeedback state={tx.state} pendingLabel={a.claiming} confirmedLabel={result ?? undefined} revertedLabel={a.claimFailed} onRetry={() => void run()} onDismiss={tx.reset} />
+      <TxFeedback {...txLabels} {...tx.state} pendingLabel={a.claiming} confirmedLabel={result ?? txLabels.confirmedLabel} reasons={{ ...txLabels.reasons, reverted: a.claimFailed }} onRetry={() => void run()} onDismiss={tx.reset} />
     </div>
   )
 }
@@ -113,6 +114,7 @@ function ApprovalBlock({ vault, youReview, me }: { vault: Vault; youReview: bool
   const { app, locale } = useAppCopy()
   const a = app.vault.actions
   const tx = useTx()
+  const txLabels = useTxLabels()
   const policy = vault.approval!
   const met = approvalMet(vault)
   const n = policy.approvals.length
@@ -181,7 +183,7 @@ function ApprovalBlock({ vault, youReview, me }: { vault: Vault; youReview: bool
           )
         })}
       </ul>
-      <TxFeedback state={tx.state} pendingLabel={a.approving} confirmedLabel={result ?? undefined} onDismiss={tx.reset} />
+      <TxFeedback {...txLabels} {...tx.state} pendingLabel={a.approving} confirmedLabel={result ?? txLabels.confirmedLabel} onDismiss={tx.reset} />
     </div>
   )
 }
@@ -190,6 +192,7 @@ function RevokeBlock({ vault, now }: { vault: Vault; now: number }) {
   const { app, locale } = useAppCopy()
   const a = app.vault.actions
   const tx = useTx()
+  const txLabels = useTxLabels()
   const [confirming, setConfirming] = useState(false)
 
   if (vault.revokedAt) {
@@ -254,7 +257,7 @@ function RevokeBlock({ vault, now }: { vault: Vault; now: number }) {
           </div>
         </div>
       )}
-      <TxFeedback state={tx.state} pendingLabel={a.revoking} onRetry={() => void run()} onDismiss={tx.reset} />
+      <TxFeedback {...txLabels} {...tx.state} pendingLabel={a.revoking} onRetry={() => void run()} onDismiss={tx.reset} />
     </div>
   )
 }

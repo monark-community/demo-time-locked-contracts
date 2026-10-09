@@ -191,7 +191,7 @@ export function ScheduleChart({
           {ticks.map((t, i) => (
             <span
               key={`${t.at}-${i}`}
-              className="absolute top-1 text-[0.6875rem] font-semibold whitespace-nowrap text-muted-foreground tabular"
+              className="absolute top-1 text-[0.6875rem] font-semibold whitespace-nowrap text-muted-foreground tnum"
               style={{
                 left: `${fx(t.at) * 100}%`,
                 transform: i === 0 ? "none" : i === ticks.length - 1 ? "translateX(-100%)" : "translateX(-50%)",
